@@ -1,7 +1,7 @@
 # Gran Turismo 2 Save Editor
 This command-line tool allows to read and edit (raw and gme) saves of PlayStation game Gran Turismo 2.
 
-It can read game id, CRC32 checksum, cash, days, total races, total wins, licenses, car count, current car, car data and can edit cash, days, total races, total wins, licenses, car data.
+It can read game id, CRC32 checksum, cash, days, total races, total wins, licenses, car count, current car, car data and can edit cash, days, total races, total wins, licenses, current car, car data.
 
 More details about Gran Turismo 2 save can be found in the following places:
 - https://adamdadeh.github.io/fun/2019/03/28/binary_files
