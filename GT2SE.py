@@ -235,6 +235,7 @@ class GT2SaveFile:
   for i in range(self.TOT_WINS_SIZE): self.rawBytes[totWinsOffset + i] = totWinsBytes[i]
 
  def updateLicenses(self, firstBlockIndex, licenseType):
+  if not licenseType: return
   firstLicenseOffset = self.FIRST_BLOCK_OFFSET * firstBlockIndex + self.FIRST_LICENSE_OFFSET
   if self.isGme: firstLicenseOffset += self.GME_HEADER_SIZE
   val = 0
@@ -246,19 +247,20 @@ class GT2SaveFile:
   for i in range(self.N_TESTS_PER_LICENSE * self.N_LICENSES): self.rawBytes[firstLicenseOffset + self.LICENSE_SKIP * i] = val
 
  def updateCurrCar(self, firstBlockIndex, currCar):
-  val = int(currCar) if currCar else 255
-  if val < 0: return
+  if not currCar: return
+  index = int(currCar)
   _, carCount = self.getCarCount(firstBlockIndex)
-  if val > carCount - 1 and val != 255: return
+  if index < 0 or index > carCount - 1: index = 255
   currCarOffset = self.FIRST_BLOCK_OFFSET * firstBlockIndex + self.CURR_CAR_OFFSET
   if self.isGme: currCarOffset += self.GME_HEADER_SIZE
-  self.rawBytes[currCarOffset] = val
+  self.rawBytes[currCarOffset] = index
 
  def updateCar(self, firstBlockIndex, carIndex, carPropertyNames, carPropertyValues):
-  index = int(carIndex) if carIndex else 0
-  if index < 0 or not carPropertyNames or not carPropertyValues: return
+  if not carPropertyNames or not carPropertyValues: return
   _, carCount = self.getCarCount(firstBlockIndex)
-  if index > carCount - 1: return
+  if carCount == 0: return
+  index = int(carIndex) if carIndex else 0
+  if index < 0 or index > carCount - 1: index = 0
   firstCarOffset = self.FIRST_BLOCK_OFFSET * firstBlockIndex + self.FIRST_CAR_OFFSET
   if self.isGme: firstCarOffset += self.GME_HEADER_SIZE
   for i in range(len(carPropertyNames)):
