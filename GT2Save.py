@@ -345,6 +345,7 @@ class GT2Save:
             carCountOffset, carCount = self.getCarCount(startOffset)
             currCarOffset, currCar = self.getCurrCar(startOffset)
             cars = self.getCars(startOffset)
+            print("Start offset: ", startOffset, sep = "")
             print("Game Id at ", gameIdOffset, ": ", gameId, sep = "")
             print("Region: ", region, sep = "")
             print("CRC32 at ", crc32Offset, ": ", crc32, sep = "")
