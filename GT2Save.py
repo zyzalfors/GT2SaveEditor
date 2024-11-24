@@ -1,33 +1,187 @@
 import binascii, csv, os
 
 class GT2Save:
-    N_BLOCKS = 15
-    RAW_HEADER_SIZE = 128
+    N_BLOCKS = 16
+    FRAME_SIZE = 128
     GME_HEADER_SIZE = 3904
+    BLOCK_SIZE = 8192
+    GAME_IDS = {"BESCES-02380GAME": "EU", "BESCES-12380GAME": "EU",
+                "BASCUS-94455GAME": "US", "BASCUS-94488GAME": "US",
+                "BISCPS-10116GAME": "JP", "BISCPS-10117GAME": "JP"}
+
+    def __init__(self, path):
+        self.path = path
+        self.isMcr = path.lower().endswith(".mcr")
+        self.isGme = path.lower().endswith(".gme")
+        self.isPsv = path.lower().endswith(".psv")
+        with open(path, "rb") as file: self.bytes = bytearray(file.read())
+        self.readInfos()
+
+    def readInfos(self):
+        self.infos = []
+        if self.isMcr or self.isGme:
+            gmeShift = self.GME_HEADER_SIZE if self.isGme else 0
+            for i in range(1, self.N_BLOCKS):
+                frameOffset = self.FRAME_SIZE * i + gmeShift
+                headerBytes = self.bytes[frameOffset:(frameOffset + self.FRAME_SIZE)]
+                gameId = headerBytes[10:26].decode("ASCII")
+                region = self.GAME_IDS[gameId] if gameId in self.GAME_IDS else "unknown"
+                startOffset = self.BLOCK_SIZE * i + gmeShift
+                if headerBytes[0] == 0x51 and gameId in self.GAME_IDS: self.infos.append((startOffset, frameOffset + 10, gameId, region))
+        elif self.isPsv:
+            gameId = self.bytes[100:116].decode("ASCII")
+            region = self.GAME_IDS[gameId] if gameId in self.GAME_IDS else "unknown"
+            startOffset = self.bytes[68]
+            if gameId in self.GAME_IDS: self.infos.append((startOffset, 100, gameId, region))
+
+    LANG_OFFSET = 512
+    LANGUAGES = {"ja": 0, "en-us": 1, "en-gb": 2, "fr": 3, "de": 4, "it": 5, "es": 6}
+
+    def getLanguage(self, startOffset):
+        langOffset = startOffset + self.LANG_OFFSET
+        langByte = self.bytes[langOffset]
+        for lang, byte in self.LANGUAGES.items():
+            if byte == langByte: return langOffset, lang
+        return langOffset, "unknown"
+
+    def updateLanguage(self, startOffset, lang):
+        if not lang: return
+        langOffset = startOffset + self.LANG_OFFSET
+        langByte = self.LANGUAGES[lang] if lang in self.LANGUAGES else None
+        self.bytes[langOffset] = langByte
+
+    ARCADE_PROGRESS_OFFSET = 696
+    ARCADE_PROGRESS = {"none": 0, "easy": 1, "normal": 2, "hard": 4}
+    ARCADE_TRACKS = ["Rome", "Rome Short", "Rome Night", "Seattle", "Seattle Short", "Super Speedway", "Laguna Seca", "Midfield",
+                     "Apricot Hill", "Red Rock Valley", "Tahiti Road", "High Speed Ring", "Autumn Ring", "Trial Mountain",
+                     "Deep Forest", "Grand Valley", "Grand Valley East", "SSR5", "CSR5", "Grindelwald", "Test Course"]
+
+    def getArcadeProgress(self, startOffset):
+        progOffset, progress = startOffset + self.ARCADE_PROGRESS_OFFSET, []
+        for i in range(len(self.ARCADE_TRACKS)):
+            progByte = self.bytes[progOffset + i]
+            for prog, byte in self.ARCADE_PROGRESS.items():
+                if byte == progByte: progress.append([self.ARCADE_TRACKS[i], prog])
+        return progOffset, progress
+
+    def updateArcadeProgress(self, startOffset, prog):
+        if not prog: return
+        progOffset = startOffset + self.ARCADE_PROGRESS_OFFSET
+        progByte = self.ARCADE_PROGRESS[prog] if prog in self.ARCADE_PROGRESS else None
+        for i in range(len(self.ARCADE_TRACKS)): self.bytes[progOffset + i] = progByte
+
+    DAYS_OFFSET = 760
     DAYS_SIZE = 4
+
+    def getDays(self, startOffset):
+        daysOffset = startOffset + self.DAYS_OFFSET
+        daysBytes = self.bytes[daysOffset:(daysOffset + self.DAYS_SIZE)]
+        return daysOffset, int.from_bytes(daysBytes, byteorder = "little", signed = True)
+
+    def updateDays(self, startOffset, days):
+        if not days: return
+        daysOffset = startOffset + self.DAYS_OFFSET
+        daysBytes = int(days).to_bytes(self.DAYS_SIZE, byteorder = "little", signed = True)
+        for i in range(self.DAYS_SIZE): self.bytes[daysOffset + i] = daysBytes[i]
+
+    TOT_RACES_OFFSET = 768
     TOT_RACES_SIZE = 4
+
+    def getTotRaces(self, startOffset):
+        totRacesOffset = startOffset + self.TOT_RACES_OFFSET
+        totRacesBytes = self.bytes[totRacesOffset:(totRacesOffset + self.TOT_RACES_SIZE)]
+        return totRacesOffset, int.from_bytes(totRacesBytes, byteorder = "little", signed = True)
+
+    def updateTotRaces(self, startOffset, totRaces):
+        if not totRaces: return
+        totRacesOffset = startOffset + self.TOT_RACES_OFFSET
+        totRacesBytes = int(totRaces).to_bytes(self.TOT_RACES_SIZE, byteorder = "little", signed = True)
+        for i in range(self.TOT_RACES_SIZE): self.bytes[totRacesOffset + i] = totRacesBytes[i]
+
+    TOT_WINS_OFFSET = 772
     TOT_WINS_SIZE = 4
+
+    def getTotWins(self, startOffset):
+        totWinsOffset = startOffset + self.TOT_WINS_OFFSET
+        totWinsBytes = self.bytes[totWinsOffset:(totWinsOffset + self.TOT_WINS_SIZE)]
+        return totWinsOffset, int.from_bytes(totWinsBytes, byteorder = "little", signed = True)
+
+    def updateTotWins(self, startOffset, totWins):
+        if not totWins: return
+        totWinsOffset = startOffset + self.TOT_WINS_OFFSET
+        totWinsBytes = int(totWins).to_bytes(self.TOT_WINS_SIZE, byteorder = "little", signed = True)
+        for i in range(self.TOT_WINS_SIZE): self.bytes[totWinsOffset + i] = totWinsBytes[i]
+
+    TOT_PRIZE_OFFSET = 788
     TOT_PRIZE_SIZE = 4
-    CAR_SIZE = 164
-    CASH_SIZE = 4
-    CRC32_SIZE = 4
-    N_LICENSES = 6
+
+    def getTotPrize(self, startOffset):
+        totPrizeOffset = startOffset + self.TOT_PRIZE_OFFSET
+        totPrizeBytes = self.bytes[totPrizeOffset:(totPrizeOffset + self.TOT_PRIZE_SIZE)]
+        return totPrizeOffset, int.from_bytes(totPrizeBytes, byteorder = "little", signed = True)
+
+    def updateTotPrize(self, startOffset, totPrize):
+        if not totPrize: return
+        totPrizeOffset = startOffset + self.TOT_PRIZE_OFFSET
+        totPrizeBytes = int(totPrize).to_bytes(self.TOT_PRIZE_SIZE, byteorder = "little", signed = True)
+        for i in range(self.TOT_PRIZE_SIZE): self.bytes[totPrizeOffset + i] = totPrizeBytes[i]
+
+    CAREER_PROGRESS_OFFSET = 792
+    N_CAREER_EVENTS = 248
+    CAREER_PROGRESS = {"none": 0, "first": 1, "second": 2, "third": 3, "fourth": 4, "fifth": 5, "sixth": 6}
+
+    def getCareerProgress(self, startOffset):
+        progOffset, progress = startOffset + self.CAREER_PROGRESS_OFFSET, []
+        for i in range(int(self.N_CAREER_EVENTS / 2)):
+            progByte = self.bytes[progOffset + i]
+            progVal1 = progByte & 0x0F
+            progVal2 = (progByte & 0xF0) >> 4
+            for prog, val in self.CAREER_PROGRESS.items():
+                if val == progVal1: progress.append(prog)
+            for prog, val in self.CAREER_PROGRESS.items():
+                if val == progVal2: progress.append(prog)
+        return progOffset, progress
+
+    def updateCareerProgress(self, startOffset, prog):
+        if not prog: return
+        progOffset = startOffset + self.CAREER_PROGRESS_OFFSET
+        progVal1 = self.CAREER_PROGRESS[prog] if prog in self.CAREER_PROGRESS else None
+        progVal2 = progVal1
+        for i in range(int(self.N_CAREER_EVENTS / 2)): self.bytes[progOffset + i] = (progVal2 << 4) | progVal1
+
+    LICENSE_OFFSETS = {"S": 5657, "IA": 7297, "IB": 8937, "IC": 10577, "A": 12217, "B": 13857}
     N_TESTS_PER_LICENSE = 10
     LICENSE_SKIP = 164
-    MAX_CAR_COUNT = 100
-    FIRST_BLOCK_OFFSET = 8192
-    LANG_OFFSET = 512
-    DAYS_OFFSET = 760
-    TOT_RACES_OFFSET = 768
-    TOT_WINS_OFFSET = 772
-    TOT_PRIZE_OFFSET = 788
-    LICENSE_OFFSETS = {"S": 5657, "IA": 7297, "IB": 8937, "IC": 10577, "A": 12217, "B": 13857}
+    LICENSES = {"none": 0, "kid": 1, "bronze": 2, "silver": 3, "gold": 4}
+
+    def getLicenses(self, startOffset):
+        licenses = []
+        for lic in self.LICENSE_OFFSETS:
+            licOffset = startOffset + self.LICENSE_OFFSETS[lic]
+            data = [str(licOffset), lic]
+            for i in range(self.N_TESTS_PER_LICENSE):
+                licByte, licType = self.bytes[licOffset + self.LICENSE_SKIP * i], "unknown"
+                for type, byte in self.LICENSES.items():
+                    if byte == licByte: licType = type
+                data.append(licType)
+            licenses.append(data)
+        return licenses
+
+    def updateLicenses(self, startOffset, licType):
+        if not licType: return
+        firstLicOffset = startOffset + self.LICENSE_OFFSETS["S"]
+        licByte = self.LICENSES[licType] if licType in self.LICENSES else None
+        for i in range(self.N_TESTS_PER_LICENSE * len(self.LICENSE_OFFSETS)): self.bytes[firstLicOffset + self.LICENSE_SKIP * i] = licByte
+
     CAR_COUNT_OFFSET = 15988
+    MAX_CAR_COUNT = 100
+
+    def getCarCount(self, startOffset):
+        carCountOffset = startOffset + self.CAR_COUNT_OFFSET
+        return carCountOffset, self.bytes[carCountOffset]
+
     FIRST_CAR_OFFSET = 15992
-    CASH_OFFSET = 32392
-    CURR_CAR_OFFSET = 32396
-    CRC32_OFFSET = 32412
-    GAME_IDS = ["BESCES-02380GAME", "BESCES-12380GAME", "BASCUS-94455GAME", "BASCUS-94488GAME", "BISCPS-10116GAME", "BISCPS-10117GAME"]
+    CAR_SIZE = 164
     CAR_PROPERTIES = {
         "CarCode1": [0, 4],
         "ColorCode": [4, 1],
@@ -108,99 +262,12 @@ class GT2Save:
     CAR_PROPERTY_ATTRIBUTES = list(CAR_PROPERTIES.values())
     CARS_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "carsDB.csv")
 
-    def __init__(self, path):
-        self.path = path
-        self.isMcr = path.lower().endswith(".mcr")
-        self.isGme = path.lower().endswith(".gme")
-        self.isPsv = path.lower().endswith(".psv")
-        with open(path, "rb") as file: self.rawBytes = bytearray(file.read())
-        self.readInfos()
-
-    def getRegion(self, gameId):
-        if gameId.startswith("BE"): return "EU"
-        elif gameId.startswith("BA"): return "US"
-        elif gameId.startswith("BI"): return "JP"
-        return ""
-
-    def readInfos(self):
-        self.infos = []
-        if self.isMcr or self.isGme:
-            gmeShift = self.GME_HEADER_SIZE if self.isGme else 0
-            for i in range(1, self.N_BLOCKS + 1):
-                headerOffset = self.RAW_HEADER_SIZE * i + gmeShift
-                headerBytes = self.rawBytes[headerOffset:(headerOffset + self.RAW_HEADER_SIZE)]
-                gameId = headerBytes[10:26].decode("ASCII")
-                region = self.getRegion(gameId)
-                startOffset = self.FIRST_BLOCK_OFFSET * i + gmeShift
-                if headerBytes[0] == 0x51 and gameId in self.GAME_IDS: self.infos.append((startOffset, headerOffset + 10, gameId, region))
-        elif self.isPsv:
-            gameId = self.rawBytes[100:116].decode("ASCII")
-            region = self.getRegion(gameId)
-            startOffset = self.rawBytes[68]
-            if gameId in self.GAME_IDS: self.infos.append((startOffset, 100, gameId, region))
-
-    def getCash(self, startOffset):
-        cashOffset = startOffset + self.CASH_OFFSET
-        cashBytes = self.rawBytes[cashOffset:(cashOffset + self.CASH_SIZE)]
-        return cashOffset, int.from_bytes(cashBytes, byteorder = "little", signed = True)
-
-    def getLanguage(self, startOffset):
-        langOffset = startOffset + self.LANG_OFFSET
-        val, lang = self.rawBytes[langOffset], ""
-        match val:
-            case 0: lang = "JA"
-            case 1: lang = "EN-US"
-            case 2: lang = "EN-GB"
-            case 3: lang = "FR"
-            case 4: lang = "DE"
-            case 5: lang = "IT"
-            case 6: lang = "ES"
-        return langOffset, lang
-
-    def getDays(self, startOffset):
-        daysOffset = startOffset + self.DAYS_OFFSET
-        daysBytes = self.rawBytes[daysOffset:(daysOffset + self.DAYS_SIZE)]
-        return daysOffset, int.from_bytes(daysBytes, byteorder = "little", signed = True)
-
-    def getTotRaces(self, startOffset):
-        totRacesOffset = startOffset + self.TOT_RACES_OFFSET
-        totRacesBytes = self.rawBytes[totRacesOffset:(totRacesOffset + self.TOT_RACES_SIZE)]
-        return totRacesOffset, int.from_bytes(totRacesBytes, byteorder = "little", signed = True)
-
-    def getTotWins(self, startOffset):
-        totWinsOffset = startOffset + self.TOT_WINS_OFFSET
-        totWinsBytes = self.rawBytes[totWinsOffset:(totWinsOffset + self.TOT_WINS_SIZE)]
-        return totWinsOffset, int.from_bytes(totWinsBytes, byteorder = "little", signed = True)
-
-    def getTotPrize(self, startOffset):
-        totPrizeOffset = startOffset + self.TOT_PRIZE_OFFSET
-        totPrizeBytes = self.rawBytes[totPrizeOffset:(totPrizeOffset + self.TOT_PRIZE_SIZE)]
-        return totPrizeOffset, int.from_bytes(totPrizeBytes, byteorder = "little", signed = True)
-
-    def getLicenses(self, startOffset):
-        licenses = []
-        for license in self.LICENSE_OFFSETS:
-            licenseOffset = startOffset + self.LICENSE_OFFSETS[license]
-            data = [str(licenseOffset), license]
-            for i in range(self.N_TESTS_PER_LICENSE):
-                val, licenseType = self.rawBytes[licenseOffset + self.LICENSE_SKIP * i], ""
-                match val:
-                    case 0: licenseType = "none"
-                    case 1: licenseType = "kid"
-                    case 2: licenseType = "bronze"
-                    case 3: licenseType = "silver"
-                    case 4: licenseType = "gold"
-                data.append(licenseType)
-            licenses.append(data)
-        return licenses
-
-    def getCurrCar(self, startOffset):
-        currCarOffset = startOffset + self.CURR_CAR_OFFSET
-        return currCarOffset, self.rawBytes[currCarOffset]
-
-    def getCarCount(self, startOffset):
-        carCountOffset = startOffset + self.CAR_COUNT_OFFSET
-        return carCountOffset, self.rawBytes[carCountOffset]
+    def getCarName(self, carData, carCode, region):
+        for data in carData:
+            if data[0] == carCode and region == "EU": return data[1]
+            elif data[0] == carCode and region == "US": return data[2]
+            elif data[0] == carCode and region == "JP": return data[3]
+        return "unknown"
 
     def getCars(self, startOffset):
         cars = []
@@ -211,79 +278,46 @@ class GT2Save:
         with open(self.CARS_DB_PATH, encoding = "UTF-8", newline = "") as file: carData = list(csv.reader(file, delimiter = ","))
         for i in range(carCount):
             carOffset = startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * i
-            carBytes = self.rawBytes[carOffset:(carOffset + self.CAR_SIZE)]
+            carBytes = self.bytes[carOffset:(carOffset + self.CAR_SIZE)]
             data = [str(carOffset), str(i)]
-            for attribute in self.CAR_PROPERTY_ATTRIBUTES: data.append(binascii.hexlify(carBytes[attribute[0]:(attribute[0] + attribute[1])]).decode("ASCII").upper())
+            for attr in self.CAR_PROPERTY_ATTRIBUTES: data.append(binascii.hexlify(carBytes[attr[0]:(attr[0] + attr[1])]).decode("ASCII").upper())
             carName = self.getCarName(carData, data[66], region)
             data.insert(2, carName)
             cars.append(data)
         return cars
 
-    def getCarName(self, carData, carCode, region):
-        for data in carData:
-            if data[0] == carCode and region == "EU": return data[1]
-            elif data[0] == carCode and region == "US": return data[2]
-            elif data[0] == carCode and region == "JP": return data[3]
-        return ""
+    def updateCar(self, startOffset, carIndex, carPropNames, carPropValues):
+        if not carIndex or not carPropNames or not carPropValues: return
+        index = int(carIndex)
+        _, carCount = self.getCarCount(startOffset)
+        if index < 0 or index > carCount - 1: return
+        carOffset = startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * index
+        for i in range(len(carPropNames)):
+            propAttributes = self.CAR_PROPERTY_ATTRIBUTES[self.CAR_PROPERTY_NAMES.index(carPropNames[i])]
+            propOffset = propAttributes[0]
+            propValue = binascii.unhexlify(carPropValues[i])
+            propSize = min([propAttributes[1], len(propValue)])
+            for j in range(propSize): self.bytes[carOffset + propOffset + j] = propValue[j]
 
-    def getCrc32(self, startOffset):
-        crc32Offset = startOffset + self.CRC32_OFFSET
-        crc32Bytes = self.rawBytes[crc32Offset:(crc32Offset + self.CRC32_SIZE)]
-        return crc32Offset, int.from_bytes(crc32Bytes, byteorder = "little")
+    CASH_OFFSET = 32392
+    CASH_SIZE = 4
+
+    def getCash(self, startOffset):
+        cashOffset = startOffset + self.CASH_OFFSET
+        cashBytes = self.bytes[cashOffset:(cashOffset + self.CASH_SIZE)]
+        return cashOffset, int.from_bytes(cashBytes, byteorder = "little", signed = True)
 
     def updateCash(self, startOffset, cash):
         if not cash: return
         cashOffset = startOffset + self.CASH_OFFSET
         cashBytes = int(cash).to_bytes(self.CASH_SIZE, byteorder = "little", signed = True)
-        for i in range(self.CASH_SIZE): self.rawBytes[cashOffset + i] = cashBytes[i]
+        for i in range(self.CASH_SIZE): self.bytes[cashOffset + i] = cashBytes[i]
 
-    def updateLanguage(self, startOffset, lang):
-        if not lang: return
-        langOffset, val = startOffset + self.LANG_OFFSET, None
-        match lang:
-            case "ja": val = 0
-            case "en-us": val = 1
-            case "en-gb": val = 2
-            case "fr": val = 3
-            case "de": val = 4
-            case "it": val = 5
-            case "es": val = 6
-        self.rawBytes[langOffset] = val
+    CURR_CAR_OFFSET = 32396
 
-    def updateDays(self, startOffset, days):
-        if not days: return
-        daysOffset = startOffset + self.DAYS_OFFSET
-        daysBytes = int(days).to_bytes(self.DAYS_SIZE, byteorder = "little", signed = True)
-        for i in range(self.DAYS_SIZE): self.rawBytes[daysOffset + i] = daysBytes[i]
-
-    def updateTotRaces(self, startOffset, totRaces):
-        if not totRaces: return
-        totRacesOffset = startOffset + self.TOT_RACES_OFFSET
-        totRacesBytes = int(totRaces).to_bytes(self.TOT_RACES_SIZE, byteorder = "little", signed = True)
-        for i in range(self.TOT_RACES_SIZE): self.rawBytes[totRacesOffset + i] = totRacesBytes[i]
-
-    def updateTotWins(self, startOffset, totWins):
-        if not totWins: return
-        totWinsOffset = startOffset + self.TOT_WINS_OFFSET
-        totWinsBytes = int(totWins).to_bytes(self.TOT_WINS_SIZE, byteorder = "little", signed = True)
-        for i in range(self.TOT_WINS_SIZE): self.rawBytes[totWinsOffset + i] = totWinsBytes[i]
-
-    def updateTotPrize(self, startOffset, totPrize):
-        if not totPrize: return
-        totPrizeOffset = startOffset + self.TOT_PRIZE_OFFSET
-        totPrizeBytes = int(totPrize).to_bytes(self.TOT_PRIZE_SIZE, byteorder = "little", signed = True)
-        for i in range(self.TOT_PRIZE_SIZE): self.rawBytes[totPrizeOffset + i] = totPrizeBytes[i]
-
-    def updateLicenses(self, startOffset, licenseType):
-        if not licenseType: return
-        firstLicenseOffset, val = startOffset + self.LICENSE_OFFSETS["S"], None
-        match licenseType:
-            case "none": val = 0
-            case "kid": val = 1
-            case "bronze": val = 2
-            case "silver": val = 3
-            case "gold": val = 4
-        for i in range(self.N_TESTS_PER_LICENSE * self.N_LICENSES): self.rawBytes[firstLicenseOffset + self.LICENSE_SKIP * i] = val
+    def getCurrCar(self, startOffset):
+        currCarOffset = startOffset + self.CURR_CAR_OFFSET
+        return currCarOffset, self.bytes[currCarOffset]
 
     def updateCurrCar(self, startOffset, carIndex):
         if not carIndex: return
@@ -292,75 +326,75 @@ class GT2Save:
         if carCount == 0: return
         if index < 0 or index > carCount - 1: index = 255
         currCarOffset = startOffset + self.CURR_CAR_OFFSET
-        self.rawBytes[currCarOffset] = index
+        self.bytes[currCarOffset] = index
 
-    def updateCar(self, startOffset, carIndex, carPropertyNames, carPropertyValues):
-        if not carIndex or not carPropertyNames or not carPropertyValues: return
-        index = int(carIndex)
-        _, carCount = self.getCarCount(startOffset)
-        if index < 0 or index > carCount - 1: return
-        carOffset = startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * index
-        for i in range(len(carPropertyNames)):
-            propertyAttributes = self.CAR_PROPERTY_ATTRIBUTES[self.CAR_PROPERTY_NAMES.index(carPropertyNames[i])]
-            propertyOffset = propertyAttributes[0]
-            propertyValue = binascii.unhexlify(carPropertyValues[i])
-            size = min([propertyAttributes[1], len(propertyValue)])
-            for j in range(size): self.rawBytes[carOffset + propertyOffset + j] = propertyValue[j]
+    CRC32_OFFSET = 32412
+    CRC32_SIZE = 4
+
+    def getCrc32(self, startOffset):
+        crc32Offset = startOffset + self.CRC32_OFFSET
+        crc32Bytes = self.bytes[crc32Offset:(crc32Offset + self.CRC32_SIZE)]
+        return crc32Offset, int.from_bytes(crc32Bytes, byteorder = "little")
 
     def updateCrc32(self, startOffset):
         crc32Offset = startOffset + self.CRC32_OFFSET
-        saveBytes = self.rawBytes[startOffset:crc32Offset]
+        saveBytes = self.bytes[startOffset:crc32Offset]
         crc32Bytes = binascii.crc32(saveBytes).to_bytes(self.CRC32_SIZE, byteorder = "little")
-        for i in range(self.CRC32_SIZE): self.rawBytes[crc32Offset + i] = crc32Bytes[i]
+        for i in range(self.CRC32_SIZE): self.bytes[crc32Offset + i] = crc32Bytes[i]
+
+    def read(self, saveIndex):
+        for i in range(len(self.infos)):
+            if saveIndex and i != int(saveIndex): continue
+            info = self.infos[i]
+            startOffset, gameIdOffset, gameId, region = info[0], info[1], info[2], info[3]
+            print("Start offset: ", startOffset, sep = "")
+            print("Game Id at ", gameIdOffset, ": ", gameId, sep = "")
+            print("Region: ", region, sep = "")
+            crc32Offset, crc32 = self.getCrc32(startOffset)
+            print("CRC32 at ", crc32Offset, ": ", crc32, sep = "")
+            cashOffset, cash = self.getCash(startOffset)
+            print("Cash at ", cashOffset, ": ", cash, sep = "")
+            langOffset, lang = self.getLanguage(startOffset)
+            print("Language at ", langOffset, ": ", lang, sep = "")
+            daysOffset, days = self.getDays(startOffset)
+            print("Days at ", daysOffset, ": ", days, sep = "")
+            totRacesOffset, totRaces = self.getTotRaces(startOffset)
+            print("Total races at ", totRacesOffset, ": ", totRaces, sep = "")
+            totWinsOffset, totWins = self.getTotWins(startOffset)
+            print("Total wins at ", totWinsOffset, ": ", totWins, sep = "")
+            totPrizeOffset, totPrize = self.getTotPrize(startOffset)
+            print("Total prize at ", totPrizeOffset, ": ", totPrize, sep = "")
+            arcadeProgOffset, arcadeProgress = self.getArcadeProgress(startOffset)
+            licenses = self.getLicenses(startOffset)
+            for lic in licenses: print("License ", lic[1], " at ", lic[0], ": ", ",".join(lic[2:]), sep = "")
+            print("Arcade progress at ", arcadeProgOffset, ":", sep = "")
+            for prog in arcadeProgress: print(prog[0], ": ", prog[1], sep = "")
+            careerProgOffset, careerProgress = self.getCareerProgress(startOffset)
+            print("Career progress at ", careerProgOffset, ": ", ",".join(careerProgress), sep = "")
+            carCountOffset, carCount = self.getCarCount(startOffset)
+            print("Car count at ", carCountOffset, ": ", carCount, sep = "")
+            currCarOffset, currCar = self.getCurrCar(startOffset)
+            if currCar < self.MAX_CAR_COUNT: print("Current car at ", currCarOffset, ": ", currCar, sep = "")
+            else: print("Current car at ", currCarOffset, ": none", sep = "")
+            cars = self.getCars(startOffset)
+            if len(cars) > 0: print("Offset,", "Index,", "CarName,", ",".join(list(self.CAR_PROPERTIES.keys())), sep = "")
+            for car in cars: print(",".join(car))
 
     def update(self, saveIndex, vals):
         for i in range(len(self.infos)):
             if saveIndex and i != int(saveIndex): continue
             info = self.infos[i]
             startOffset = info[0]
-            self.updateCash(startOffset, vals.cash)
             self.updateLanguage(startOffset, vals.lang)
+            self.updateArcadeProgress(startOffset, vals.aprog)
             self.updateDays(startOffset, vals.days)
             self.updateTotRaces(startOffset, vals.races)
             self.updateTotWins(startOffset, vals.wins)
             self.updateTotPrize(startOffset, vals.prize)
+            self.updateCareerProgress(startOffset, vals.cprog)
             self.updateLicenses(startOffset, vals.lic)
-            self.updateCurrCar(startOffset, vals.curr)
             self.updateCar(startOffset, vals.car, vals.prop, vals.val)
+            self.updateCash(startOffset, vals.cash)
+            self.updateCurrCar(startOffset, vals.curr)
             self.updateCrc32(startOffset)
-
-    def print(self, saveIndex):
-        for i in range(len(self.infos)):
-            if saveIndex and i != int(saveIndex): continue
-            info = self.infos[i]
-            startOffset, gameIdOffset, gameId, region = info[0], info[1], info[2], info[3]
-            crc32Offset, crc32 = self.getCrc32(startOffset)
-            cashOffset, cash = self.getCash(startOffset)
-            langOffset, lang = self.getLanguage(startOffset)
-            daysOffset, days = self.getDays(startOffset)
-            totRacesOffset, totRaces = self.getTotRaces(startOffset)
-            totWinsOffset, totWins = self.getTotWins(startOffset)
-            totPrizeOffset, totPrize = self.getTotPrize(startOffset)
-            licenses = self.getLicenses(startOffset)
-            carCountOffset, carCount = self.getCarCount(startOffset)
-            currCarOffset, currCar = self.getCurrCar(startOffset)
-            cars = self.getCars(startOffset)
-            print("Start offset: ", startOffset, sep = "")
-            print("Game Id at ", gameIdOffset, ": ", gameId, sep = "")
-            print("Region: ", region, sep = "")
-            print("CRC32 at ", crc32Offset, ": ", crc32, sep = "")
-            print("Cash at ", cashOffset, ": ", cash, sep = "")
-            print("Language at ", langOffset, ": ", lang, sep = "")
-            print("Days at ", daysOffset, ": ", days, sep = "")
-            print("Total races at ", totRacesOffset, ": ", totRaces, sep = "")
-            print("Total wins at ", totWinsOffset, ": ", totWins, sep = "")
-            print("Total prize at ", totPrizeOffset, ": ", totPrize, sep = "")
-            for license in licenses: print("License ", license[1], " at ", license[0], ": ", ",".join(license[2:]), sep = "")
-            print("Car count at ", carCountOffset, ": ", carCount, sep = "")
-            if currCar < self.MAX_CAR_COUNT: print("Current car at ", currCarOffset, ": ", currCar, sep = "")
-            else: print("Current car at ", currCarOffset, ": none", sep = "")
-            if len(cars) > 0: print("Offset,", "Index,", "CarName,", ",".join(list(self.CAR_PROPERTIES.keys())), sep = "")
-            for car in cars: print(",".join(car))
-
-    def save(self, newPath):
-        with open(newPath, "wb") as file: file.write(self.rawBytes)
+        with open(self.path, "wb") as file: file.write(self.bytes)
