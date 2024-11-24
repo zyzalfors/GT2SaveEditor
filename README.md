@@ -3,7 +3,7 @@ This command-line tool allows to read and edit saves of PlayStation game Gran Tu
 
 It can read and edit .mcr, .gme, .psv formats but can't resign .psv saves after edit.
 
-This tool can read game id, CRC32 checksum, cash, language, days, total races, total wins, total prize, licenses, car count, current car, car data and can edit cash, language, days, total races, total wins, total prize, licenses, current car, car data.
+This tool can read game id, CRC32 checksum, cash, language, days, total races, total wins, total prize, licenses, car count, current car, car data, career/arcade progress and can edit cash, language, days, total races, total wins, total prize, licenses, current car, car data, career/arcade progress.
 
 More details about Gran Turismo 2 save can be found in the following places:
 - https://adamdadeh.github.io/fun/2019/03/28/binary_files
