@@ -360,7 +360,7 @@ class GT2Save:
             print("Car count at ", offset, ": ", val, sep = "")
 
             offset, val = self.getVal(startOffset, self.CURR_CAR_OFFSET, self.CURR_CAR_SIZE, False)
-            if val > self.MAX_CAR_COUNT:
+            if val >= self.MAX_CAR_COUNT:
                 val = "none"
 
             print("Current car at ", offset, ": ", val, sep = "")
