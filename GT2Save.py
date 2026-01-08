@@ -29,12 +29,22 @@ class GT2Save:
     WINS_OFFSET = 772
     WINS_SIZE = 4
 
+    SUM_OF_BEST_RANKINGS_OFFSET = 776
+    SUM_OF_BEST_RANKINGS_SIZE = 4
+
+    SUM_OF_RANKINGS_OFFSET = 780
+    SUM_OF_RANKINGS_SIZE = 4
+
     PRIZE_OFFSET = 788
     PRIZE_SIZE = 4
 
     CAREER_PROGRESS_OFFSET = 792
     CAREER_PROGRESS = {"none": 0, "1st": 1, "2nd": 2, "3rd": 3, "4th": 4, "5th": 5, "6th": 6}
     CAREER_EVENTS = 248
+    CAREER_EVENTS_FOR_100 = 219
+
+    ENDING_MOVIE_OFFSET = 1045
+    ENDING_MOVIE_SIZE = 1
 
     LICENSE_OFFSETS = {"S": 5657, "IA": 7297, "IB": 8937, "IC": 10577, "A": 12217, "B": 13857}
     LICENSE_PROGRESS = {"none": 0, "kid": 1, "bronze": 2, "silver": 3, "gold": 4}
@@ -58,6 +68,8 @@ class GT2Save:
 
     CRC32_OFFSET = 32412
     CRC32_SIZE = 4
+
+    INVALID_STR = "invalid"
 
 
     def __init__(self, path):
@@ -102,7 +114,7 @@ class GT2Save:
     def getLang(self, startOffset):
         offset = startOffset + self.LANG_OFFSET
         byte = self.bytes[offset]
-        return offset, next((lang for lang, langByte in self.LANGUAGES.items() if byte == langByte), "invalid")
+        return offset, next((lang for lang, langByte in self.LANGUAGES.items() if byte == langByte), self.INVALID_STR)
 
 
     def updateLang(self, startOffset, lang):
@@ -118,7 +130,7 @@ class GT2Save:
 
         for i in range(len(self.ARCADE_TRACKS)):
             byte = self.bytes[offset + i]
-            prog = next((prog for prog, progByte in self.ARCADE_PROGRESS.items() if byte == progByte), "invalid")
+            prog = next((prog for prog, progByte in self.ARCADE_PROGRESS.items() if byte == progByte), self.INVALID_STR)
             progress.append((self.ARCADE_TRACKS[i], prog))
 
         return offset, progress
@@ -155,17 +167,26 @@ class GT2Save:
     def getCareerProg(self, startOffset):
         offset = startOffset + self.CAREER_PROGRESS_OFFSET
         progress = []
+        completion = 0
 
         for i in range(int(self.CAREER_EVENTS / 2)):
             byte = self.bytes[offset + i]
 
             nibble = byte & 0x0F
-            progress.append(next((prog for prog, progNibble in self.CAREER_PROGRESS.items() if nibble == progNibble), "invalid"))
+            ranking = next((prog for prog, progNibble in self.CAREER_PROGRESS.items() if nibble == progNibble), self.INVALID_STR)
+            progress.append(ranking)
+
+            if ranking != self.INVALID_STR and nibble != 0:
+                completion += 1 / nibble
 
             nibble = (byte & 0xF0) >> 4
-            progress.append(next((prog for prog, progNibble in self.CAREER_PROGRESS.items() if nibble == progNibble), "invalid"))
+            ranking = next((prog for prog, progNibble in self.CAREER_PROGRESS.items() if nibble == progNibble), self.INVALID_STR)
+            progress.append(ranking)
 
-        return offset, progress
+            if ranking != self.INVALID_STR and nibble != 0:
+                completion += 1 / nibble
+
+        return offset, progress, round(completion * 100 / self.CAREER_EVENTS_FOR_100, 2)
 
 
     def updateCareerProg(self, startOffset, prog):
@@ -188,7 +209,7 @@ class GT2Save:
 
             for i in range(self.TESTS_PER_LICENSE):
                 byte = self.bytes[offset + self.LICENSE_SKIP * i]
-                license.append(next((prog for prog, progByte in self.LICENSE_PROGRESS.items() if byte == progByte), "invalid"))
+                license.append(next((prog for prog, progByte in self.LICENSE_PROGRESS.items() if byte == progByte), self.INVALID_STR))
 
             licenses.append(license)
 
@@ -218,7 +239,7 @@ class GT2Save:
                 elif entry[0] == code and region == "JP":
                     return entry[3]
 
-            return "invalid"
+            return self.INVALID_STR
 
 
         cars = []
@@ -250,11 +271,11 @@ class GT2Save:
         return cars
 
 
-    def updateCar(self, startOffset, data):
-        if not data:
+    def updateCar(self, startOffset, index, hexString):
+        if not index or not hexString:
             return
 
-        index = int(data[0])
+        index = int(index)
         _, carCount = self.getVal(startOffset, self.CAR_COUNT_OFFSET, self.CAR_COUNT_SIZE, False)
 
         if carCount > self.MAX_CAR_COUNT:
@@ -269,7 +290,7 @@ class GT2Save:
                 self.updateVal(startOffset, self.CAR_COUNT_OFFSET, self.CAR_COUNT_SIZE, False, carCount + 1)
 
         offset = startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * index
-        bytes = binascii.unhexlify(data[1])
+        bytes = binascii.unhexlify(hexString)
         size = min([len(bytes), self.CAR_SIZE])
 
         for i in range(size):
@@ -340,6 +361,17 @@ class GT2Save:
             offset, val = self.getVal(startOffset, self.WINS_OFFSET, self.WINS_SIZE, True)
             print("Wins at ", offset, ": ", val, sep = "")
 
+            offset, val = self.getVal(startOffset, self.SUM_OF_BEST_RANKINGS_OFFSET, self.SUM_OF_BEST_RANKINGS_SIZE, True)
+            print("Sum of best race rankings at ", offset, ": ", val, sep = "")
+            best_rankings = val
+
+            offset, val = self.getVal(startOffset, self.SUM_OF_RANKINGS_OFFSET, self.SUM_OF_RANKINGS_SIZE, True)
+            print("Sum of race rankings at ", offset, ": ", val, sep = "")
+            rankings = val
+
+            average = best_rankings / rankings if rankings != 0 else 0
+            print("Average race ranking: ", average, sep = "")
+
             offset, val = self.getVal(startOffset, self.PRIZE_OFFSET, self.PRIZE_SIZE, True)
             print("Prize at ", offset, ": ", val, sep = "")
 
@@ -352,8 +384,12 @@ class GT2Save:
             for entry in val:
                 print("  ", entry[0], ": ", entry[1], sep = "")
 
-            offset, val = self.getCareerProg(startOffset)
-            print("Career progress at ", offset, ": ", ",".join(val), sep = "")
+            offset, val1, val2 = self.getCareerProg(startOffset)
+            print("Career progress at ", offset, ": ", ",".join(val1), sep = "")
+            print("Career percentage: ", val2, sep = "")
+
+            offset, val = self.getVal(startOffset, self.ENDING_MOVIE_OFFSET, self.ENDING_MOVIE_SIZE, False)
+            print("Ending movie unlocked at ", offset, ": ", str(val > 0).lower(), sep = "")
 
             offset, val = self.getVal(startOffset, self.CAR_COUNT_OFFSET, self.CAR_COUNT_SIZE, False)
             print("Car count at ", offset, ": ", val, sep = "")
@@ -371,6 +407,8 @@ class GT2Save:
             for entry in val:
                 print(",".join(entry))
 
+            print()
+
 
     def update(self, index, vals):
         for i in range(len(self.blocks)):
@@ -384,10 +422,12 @@ class GT2Save:
             self.updateVal(startOffset, self.DAYS_OFFSET, self.DAYS_SIZE, True, vals.days)
             self.updateVal(startOffset, self.RACES_OFFSET, self.RACES_SIZE, True, vals.races)
             self.updateVal(startOffset, self.WINS_OFFSET, self.WINS_SIZE, True, vals.wins)
+            self.updateVal(startOffset, self.SUM_OF_BEST_RANKINGS_OFFSET, self.SUM_OF_BEST_RANKINGS_OFFSET, True, vals.rank[0] if vals.rank else None)
+            self.updateVal(startOffset, self.SUM_OF_RANKINGS_OFFSET, self.SUM_OF_RANKINGS_OFFSET, True, vals.rank[1] if vals.rank else None)
             self.updateVal(startOffset, self.PRIZE_OFFSET, self.PRIZE_SIZE, True, vals.prize)
             self.updateCareerProg(startOffset, vals.car)
             self.updateLicenceProg(startOffset, vals.lic)
-            self.updateCar(startOffset, vals.edit)
+            self.updateCar(startOffset, vals.edit[0] if vals.edit else None, vals.edit[1] if vals.edit else None)
             self.updateVal(startOffset, self.MONEY_OFFSET, self.MONEY_SIZE, True, vals.money)
             self.updateCurrCar(startOffset, vals.cur)
             self.updateCrc32(startOffset)

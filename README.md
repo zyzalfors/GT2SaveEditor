@@ -3,17 +3,20 @@ This command-line tool allows users to read and edit save files for the PlayStat
 
 It supports .mcr, .gme, and .psv formats but cannot resign .psv saves after editing.
 
-The tool can read various properties such as game ID, CRC32 checksum, cash, language, days, total races, total wins, total prize money, licenses, car count, current car, car data, and career/arcade progress. It also allows editing of properties like cash, language, days, total races, total wins, total prize money, licenses, current car, car data, and career/arcade progress.
+The tool can read various properties such as game Id, checksum, money, language, days, races, wins, rankings, prize, licenses, car count, current car, car data, career/arcade progress, and career percentage.
+
+It also allows editing of properties like money, language, days, races, wins, rankings, prize, licenses, current car, car data, and career/arcade progress.
 
 More details about Gran Turismo 2 save files can be found in the following resources:
 - https://adamdadeh.github.io/fun/2019/03/28/binary_files
 - https://web.archive.org/web/20010613205439/http://ubb.granturismo.com/Forum18/HTML/000929.html
 - https://web.archive.org/web/20080221203449/http://www.rogs.dial.pipex.com/indexref.htm
+- https://web.archive.org/web/20190823163405/http://www.angelfire.com/fl4/JuanDon/SaveFileFormat.html
 
 Similar repositories:
 - https://github.com/iComputer7/GT2Bizhawk
 - https://github.com/pez2k/gt2tools/tree/master/GT2SaveEditor/GT2SaveEditor
-  
+
 General information about raw PlayStation memory card format can be found here:
 - https://github.com/ShendoXT/memcardrex
 - https://www.psdevwiki.com/ps3/PS1_Savedata
