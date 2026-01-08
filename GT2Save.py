@@ -245,8 +245,7 @@ class GT2Save:
             hexBytes = binascii.hexlify(bytes).decode("ASCII").upper()
             code = binascii.hexlify(bytes[codeAttr[0]:(codeAttr[0] + codeAttr[1])]).decode("ASCII").upper()
 
-            car = [str(offset), str(i), getCarName(data, code, region), hexBytes]
-            cars.append(car)
+            cars.append((str(offset), str(i), getCarName(data, code, region), hexBytes))
 
         return cars
 
