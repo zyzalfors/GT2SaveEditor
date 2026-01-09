@@ -86,10 +86,10 @@ DCF5380B,[R]Mazda Demio GL-X '97,[R]Mazda Demio GL-X '97,[R]MAZDA DEMIO GL-X '97
 5CE7590B,[R]Mazda 323F Coupe 2000 '93,[R]Mazda 323F Coupe 2000 '93,[R]MAZDA LANTIS Coupe
 18365D0B,Mazda MX-5 (J) '93,Mazda MX-5 Miata '93,EUNOS ROADSTER '93
 1C365D0B,[R]Mazda MX-5 (J) '93,[R]Mazda MX-5 Miata '93,[R]EUNOS ROADSTER '93
-58375D0B,Mazda MX-5 S sp. (J) '93,Mazda MX-5 Miata S sp.'93,EUNOS ROADSTER S sp. '93
-5C375D0B,[R]Mazda MX-5 S sp. (J) '93,[R]Mazda MX-5 Miata S sp.'93,[R]EUNOS ROADSTER S sp. '93
-18385D0B,Mazda MX-5 V sp. (J) '93,Mazda MX-5 Miata V sp.'93,EUNOS ROADSTER V sp. '93
-1C385D0B,[R]Mazda MX-5 V sp. (J) '93,[R]Mazda MX-5 Miata V sp.'93,[R]EUNOS ROADSTER V sp. '93
+58375D0B,Mazda MX-5 S sp. (J) '93,Mazda MX-5 Miata S sp. '93,EUNOS ROADSTER S sp. '93
+5C375D0B,[R]Mazda MX-5 S sp. (J) '93,[R]Mazda MX-5 Miata S sp. '93,[R]EUNOS ROADSTER S sp. '93
+18385D0B,Mazda MX-5 V sp. (J) '93,Mazda MX-5 Miata V sp. '93,EUNOS ROADSTER V sp. '93
+1C385D0B,[R]Mazda MX-5 V sp. (J) '93,[R]Mazda MX-5 Miata V sp. '93,[R]EUNOS ROADSTER V sp. '93
 D821600B,Mazda MX-5 (J) '89,Mazda MX-5 Miata '89,EUNOS ROADSTER '89
 DC21600B,[R]Mazda MX-5 (J) '89,[R]Mazda MX-5 Miata '89,[R]EUNOS ROADSTER '89
 9893710B,Mazda MX-5 1.8 RS (J) '98,Mazda MX-5 Miata 1.8 RS,MAZDA ROADSTER 1.8 RS
@@ -784,7 +784,7 @@ D8930D1B,Daihatsu Opti Aero. Beex '98,Daihatsu Opti Aero. Beex '98,DAIHATSU OPTI
 5CD40D1B,[R]Daihatsu Sirion Rally Car,[R]Daihatsu Storia Rally Car,[R]DAIHATSU STORIA RALLY CAR
 98D70D1B,Daihatsu Sirion (2WD) '98,Daihatsu Storia CX (2WD) '98,DAIHATSU STORIA CX 2WD
 9CD70D1B,[R]Daihatsu Sirion (2WD) '98,[R]Daihatsu Storia CX (2WD) '98,[R]DAIHATSU STORIA CX 2WD
-D8E30D1B,Daihatsu Terios Kid Aero.'98,Daihatsu Terios Kid Aero.'98,DAIHATSU TERIOS KID Aero.
+D8E30D1B,Daihatsu Terios Kid Aero. '98,Daihatsu Terios Kid Aero. '98,DAIHATSU TERIOS KID Aero.
 18E70D1B,Daihatsu Cuore (Aero Pac.),Daihatsu Mira TR '98,DAIHATSU MIRA TR
 1CE70D1B,[R]Daihatsu Cuore (Aero Pac.),[R]Daihatsu Mira TR '98,[R]DAIHATSU MIRA TR
 98E80D1B,Daihatsu Cuore,Daihatsu Mira TX '98,DAIHATSU MIRA TX
@@ -889,8 +889,8 @@ DC12591D,[R]Legacy Wagon GT '96,[R]Legacy Touring Wgn GT-B '96,[R]LEGACY Touring
 98C3011E,TRD3000GT,TRD3000GT,TRD3000GT
 9CC3011E,[R]TRD3000GT,[R]TRD3000GT,[R]TRD3000GT
 D810041E,[R][R][R]COURSE BG,[R][R][R]COURSE BG,[R][R][R]COURSE BG
-98200C1E,Toyota MR2 1600G-Ltd.'86,Toyota MR2 1600G-Ltd.'86,TOYOTA AW11 MR2 1.6G-Ltd
-9C200C1E,[R]Toyota MR2 1600G-Ltd.'86,[R]Toyota MR2 1600G-Ltd.'86,[R]TOYOTA AW11 MR2 1.6G-Ltd
+98200C1E,Toyota MR2 1600G-Ltd. '86,Toyota MR2 1600G-Ltd. '86,TOYOTA AW11 MR2 1.6G-Ltd
+9C200C1E,[R]Toyota MR2 1600G-Ltd. '86,[R]Toyota MR2 1600G-Ltd. '86,[R]TOYOTA AW11 MR2 1.6G-Ltd
 98330C1E,TRD2000GT,TRD2000GT,TRD2000GT
 58340C1E,Toyota 2000GT '67,Toyota 2000GT GT '68,TOYOTA 2000GT '67
 5C340C1E,[R]Toyota 2000GT '67,[R]Toyota 2000GT GT '68,[R]TOYOTA 2000GT '67
@@ -902,7 +902,7 @@ D810041E,[R][R][R]COURSE BG,[R][R][R]COURSE BG,[R][R][R]COURSE BG
 9C800C1E,[R]Toyota Starlet Turbo S '87,[R]Toyota Starlet Turbo S '87,[R]TOYOTA EP71 STARLET
 98910C1E,Toyota Celica GT-Four '88,Toyota Celica GT-Four '88,TOYOTA ST165 GT-FOUR
 9C910C1E,[R]Toyota Celica GT-Four '88,[R]Toyota Celica GT-Four '88,[R]TOYOTA ST165 GT-FOUR
-DC910C1E,[R]BP Apex Kraft Trueno GT,[R]BP Apex Kraft Trueno GT,[R]BP A'PEX KRAFT TRUENO GT
+DC910C1E,[R]BP Apex Kraft Trueno GT,[R]BP Apex Kraft Trueno GT,[R]BP APEX KRAFT TRUENO GT
 1C970C1E,[R]Toyota Celica Rally Car,[R]Toyota Celica Rally Car,[R]TOYOTA ST165 RALLY CAR
 98A00C1E,Toyota Altezza RS200 '98,Toyota Altezza RS200 '98,TOYOTA ALTEZZA RS200
 9CA00C1E,[R]Toyota Altezza RS200 '98,[R]Toyota Altezza RS200 '98,[R]TOYOTA ALTEZZA RS200
@@ -921,7 +921,7 @@ DCA00C1E,[R]Lexus IS,[R]Lexus IS,[R]TOYOTA ALTEZZA AS200
 5CD10C1E,[R]Toyota Celica GT-Four '91,[R]Toyota Celica GT-Four '91,[R]TOYOTA ST185 GT-FOUR
 D8D20C1E,Toyota Caldina GT-T '97,Toyota Caldina GT-T '97,TOYOTA CALDINA GT-T
 DCD20C1E,[R]Toyota Caldina GT-T '97,[R]Toyota Caldina GT-T '97,[R]TOYOTA CALDINA GT-T
-98D30C1E,XYR Detroit Show Ver.'99,XYR Detroit Show Ver.'99,TOYOTA CELICA XYR
+98D30C1E,XYR Detroit Show Ver. '99,XYR Detroit Show Ver. '99,TOYOTA CELICA XYR
 D8D30C1E,Toyota Celica E.S. Ver. '99,Toyota Celica E.S. Ver. '99,TOYOTA CELICA SS-II E.S. Ver.
 DCD30C1E,[R]Toyota Celica E.S. Ver. '99,[R]Toyota Celica E.S. Ver. '99,[R]TOYOTA CELICA SS-II E.S. Ver.
 9CD50C1E,[R]Toyota Celica Rally Car,[R]Toyota Celica Rally Car,[R]CELICA XYR RALLY CAR

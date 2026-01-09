@@ -271,8 +271,8 @@ class GT2Save:
         return cars
 
 
-    def updateCar(self, startOffset, index, hexString):
-        if not index or not hexString:
+    def updateCar(self, startOffset, index, hex):
+        if not index or not hex or len(hex) % 2 != 0:
             return
 
         index = int(index)
@@ -290,7 +290,7 @@ class GT2Save:
                 self.updateVal(startOffset, self.CAR_COUNT_OFFSET, self.CAR_COUNT_SIZE, False, carCount + 1)
 
         offset = startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * index
-        bytes = binascii.unhexlify(hexString)
+        bytes = binascii.unhexlify(hex)
         size = min([len(bytes), self.CAR_SIZE])
 
         for i in range(size):
@@ -330,8 +330,11 @@ class GT2Save:
 
 
     def read(self, index):
+        index = -1 if index is None else int(index)
+
         for i in range(len(self.blocks)):
-            if index and i != int(index): continue
+            if index >= 0 and i != index:
+                continue
 
             block = self.blocks[i]
             startOffset = block[0]
@@ -411,8 +414,11 @@ class GT2Save:
 
 
     def update(self, index, vals):
+        index = -1 if index is None else int(index)
+
         for i in range(len(self.blocks)):
-            if index and i != int(index): continue
+            if index >= 0 and i != index:
+                continue
 
             block = self.blocks[i]
             startOffset = block[0]

@@ -17,8 +17,8 @@ def readArgs():
     parser.add_argument("-wins", action = "store", help = "set career wins")
     parser.add_argument("-rank", nargs = 2, metavar = ("BEST_RANK", "RANK"), action = "store", help = "set career rankings")
     parser.add_argument("-prize", action = "store", help = "set career prize")
-    parser.add_argument("-cur", metavar = ("CAR_INDEX"), action = "store", help = "set current career car")
-    parser.add_argument("-edit", nargs = 2, metavar = ("CAR_INDEX", "HEX_STRING"), action = "store", help = "set career car bytes as little endian hex string")
+    parser.add_argument("-cur", metavar = ("CAR_INDEX"), action = "store", help = "set current career car (car index from 0 to car count - 1)")
+    parser.add_argument("-edit", nargs = 2, metavar = ("CAR_INDEX", "HEX_STRING"), action = "store", help = "set career car bytes (bytes as little endian hex string)")
 
     return parser.parse_args()
 
