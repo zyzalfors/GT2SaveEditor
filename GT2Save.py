@@ -330,7 +330,7 @@ class GT2Save:
 
 
     def read(self, index):
-        index = -1 if index is None else int(index)
+        index = int(index) if index else -1
 
         for i in range(len(self.blocks)):
             if index >= 0 and i != index:
@@ -414,7 +414,7 @@ class GT2Save:
 
 
     def update(self, index, vals):
-        index = -1 if index is None else int(index)
+        index = int(index) if index else -1
 
         for i in range(len(self.blocks)):
             if index >= 0 and i != index:
