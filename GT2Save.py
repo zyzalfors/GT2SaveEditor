@@ -291,7 +291,7 @@ class GT2Save:
 
         offset = startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * index
         bytes = binascii.unhexlify(hex)
-        size = min([len(bytes), self.CAR_SIZE])
+        size = min(len(bytes), self.CAR_SIZE)
 
         for i in range(size):
             self.bytes[offset + i] = bytes[i]
