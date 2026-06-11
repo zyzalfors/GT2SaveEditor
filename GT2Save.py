@@ -366,13 +366,13 @@ class GT2Save:
 
             offset, val = self.getVal(startOffset, self.SUM_OF_BEST_RANKINGS_OFFSET, self.SUM_OF_BEST_RANKINGS_SIZE, True)
             print("Sum of best race rankings at ", offset, ": ", val, sep = "")
-            best_rankings = val
+            bestRankings = val
 
             offset, val = self.getVal(startOffset, self.SUM_OF_RANKINGS_OFFSET, self.SUM_OF_RANKINGS_SIZE, True)
             print("Sum of race rankings at ", offset, ": ", val, sep = "")
             rankings = val
 
-            average = best_rankings / rankings if rankings != 0 else 0
+            average = bestRankings / rankings if rankings != 0 else 0
             print("Average race ranking: ", average, sep = "")
 
             offset, val = self.getVal(startOffset, self.PRIZE_OFFSET, self.PRIZE_SIZE, True)
