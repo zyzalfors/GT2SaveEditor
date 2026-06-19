@@ -271,8 +271,8 @@ class GT2Save:
         return cars
 
 
-    def updateCar(self, startOffset, index, hex):
-        if not index or not hex or len(hex) % 2 != 0:
+    def updateCar(self, startOffset, index, hexBytes):
+        if not index or not hexBytes or len(hexBytes) % 2 != 0:
             return
 
         index = int(index)
@@ -290,7 +290,7 @@ class GT2Save:
                 self.updateVal(startOffset, self.CAR_COUNT_OFFSET, self.CAR_COUNT_SIZE, False, carCount + 1)
 
         offset = startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * index
-        bytes = binascii.unhexlify(hex)
+        bytes = binascii.unhexlify(hexBytes)
         size = min(len(bytes), self.CAR_SIZE)
 
         for i in range(size):
