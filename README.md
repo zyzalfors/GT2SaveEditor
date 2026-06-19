@@ -3,7 +3,7 @@ This command-line tool allows users to read and edit save files for the PlayStat
 
 It supports .mcr, .gme, and .psv formats but cannot resign .psv saves after editing.
 
-The tool can read various properties such as game Id, checksum, money, language, days, races, wins, rankings, prize, licenses, car count, current car, car data, career/arcade progress, and career percentage.
+The tool can read various properties such as game id, checksum, money, language, days, races, wins, rankings, prize, licenses, car count, current car, car data, career/arcade progress, and career percentage.
 
 It also allows editing of properties like money, language, days, races, wins, rankings, prize, licenses, current car, car data, and career/arcade progress.
 
