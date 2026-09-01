@@ -1,5 +1,5 @@
 # Gran Turismo 2 Save Editor
-This command-line tool allows users to read and edit save files for the PlayStation game Gran Turismo 2; it works with all game versions/regions and offers partial compatibility with [GT2+](https://www.gtplanet.net/forum/threads/mod-gran-turismo-2-plus-bug-fixes-restored-content-and-new-content-beta-7-released.378282/) and [GT2AS](https://x.com/projectaspec).
+This command-line tool allows users to read and edit save files for the PlayStation game Gran Turismo 2. It supports all save versions and regions, with partial compatibility for [GT2+](https://www.gtplanet.net/forum/threads/mod-gran-turismo-2-plus-bug-fixes-restored-content-and-new-content-beta-7-released.378282/) and [GT2AS](https://x.com/projectaspec) saves.
 
 It supports .mcr, .gme, and .psv formats but cannot resign .psv saves after editing.
 
