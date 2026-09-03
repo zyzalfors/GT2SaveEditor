@@ -17,7 +17,8 @@ usage: GT2SaveEditor.py [-h] [-path PATH] [-save {0,1,2}] [-read] [-lang {ja,en-
 options:
   -h, --help                           show this help message and exit
   -path PATH                           set image path
-  -save {0,1,2}                        set save to read/edit, do not set to read/edit all saves read saves
+  -save {0,1,2}                        set save to read/edit, do not set to read/edit all saves
+  -read                                read saves
   -lang {ja,en-us,en-gb,fr,de,it,es}   set language
   -arc {none,easy,normal,hard}         set arcade progress
   -car {none,1st,2nd,3rd,4th,5th,6th}  set career progress
