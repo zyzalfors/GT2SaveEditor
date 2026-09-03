@@ -8,28 +8,28 @@ The tool can read various properties such as game id, checksum, money, language,
 It also allows editing of properties like money, language, days, races, wins, rankings, prize, licenses, current car, car data, and career/arcade progress.
 
 ```
-usage: GT2SaveEditor.py.py [-h] [-path PATH] [-save {0,1,2}] [-read] [-lang {ja,en-us,en-gb,fr,de,it,es}]
+usage: GT2SaveEditor.py [-h] [-path PATH] [-save {0,1,2}] [-read] [-lang {ja,en-us,en-gb,fr,de,it,es}]
                            [-arc {none,easy,normal,hard}] [-car {none,1st,2nd,3rd,4th,5th,6th}]
                            [-lic {none,kid,bronze,silver,gold}] [-money MONEY]
                            [-days DAYS] [-races RACES] [-wins WINS] [-rank BEST_RANK RANK]
                            [-prize PRIZE] [-cur CAR_INDEX] [-edit CAR_INDEX HEX_STRING]
 
 options:
-  -h, --help                          show this help message and exit
-  -path PATH                          set image path
-  -save {0,1,2}                       set save to read/edit, do not set to read/edit all saves read saves
-  -lang {ja,en-us,en-gb,fr,de,it,es}  set language
-  -arc {none,easy,normal,hard}        set arcade progress
-  -car {none,1st,2nd,3rd,4th,5th,6th} set career progress
-  -lic {none,kid,bronze,silver,gold}  set career license progress
-  -money MONEY                        set career money
-  -days DAYS                          set career days
-  -races RACES                        set career races
-  -wins WINS                          set career wins
-  -rank BEST_RANK RANK                set career rankings
-  -prize PRIZE                        set career prize
-  -cur CAR_INDEX                      set current career car (car index from 0 to car count - 1)
-  -edit CAR_INDEX HEX_STRING          set career car bytes (bytes as little endian hex string)
+  -h, --help                           show this help message and exit
+  -path PATH                           set image path
+  -save {0,1,2}                        set save to read/edit, do not set to read/edit all saves read saves
+  -lang {ja,en-us,en-gb,fr,de,it,es}   set language
+  -arc {none,easy,normal,hard}         set arcade progress
+  -car {none,1st,2nd,3rd,4th,5th,6th}  set career progress
+  -lic {none,kid,bronze,silver,gold}   set career license progress
+  -money MONEY                         set career money
+  -days DAYS                           set career days
+  -races RACES                         set career races
+  -wins WINS                           set career wins
+  -rank BEST_RANK RANK                 set career rankings
+  -prize PRIZE                         set career prize
+  -cur CAR_INDEX                       set current career car (car index from 0 to car count - 1)
+  -edit CAR_INDEX HEX_STRING           set career car bytes (bytes as little endian hex string)
 ```
 
 More details about Gran Turismo 2 save files can be found in the following resources:
