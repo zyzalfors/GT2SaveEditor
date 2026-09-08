@@ -1,7 +1,7 @@
 # Gran Turismo 2 Save Editor
 This command-line tool allows users to read and edit save files for the PlayStation game Gran Turismo 2. It supports all save versions and regions, with partial compatibility for [GT2+](https://www.gtplanet.net/forum/threads/mod-gran-turismo-2-plus-bug-fixes-restored-content-and-new-content-beta-7-released.378282/) and [GT2AS](https://x.com/projectaspec) saves.
 
-It supports .mcr, .gme, and .psv formats but cannot resign .psv saves after editing.
+It supports the formats RAW (raw save bytes), SC (PS1 save slot), MC (PS1 memory card image), GME (DexDrive), PSV (PS1 save image for PS3).
 
 The tool can read various properties such as game id, checksum, money, language, days, races, wins, rankings, prize, licenses, car count, current car, car data, career/arcade progress, and career percentage.
 
@@ -9,10 +9,10 @@ It also allows editing of properties like money, language, days, races, wins, ra
 
 ```
 usage: GT2SaveEditor.py [-h] [-path PATH] [-save {0,1,2}] [-read] [-lang {ja,en-us,en-gb,fr,de,it,es}]
-                           [-arc {none,easy,normal,hard}] [-car {none,1st,2nd,3rd,4th,5th,6th}]
-                           [-lic {none,kid,bronze,silver,gold}] [-money MONEY]
-                           [-days DAYS] [-races RACES] [-wins WINS] [-rank BEST_RANK RANK]
-                           [-prize PRIZE] [-cur CAR_INDEX] [-edit CAR_INDEX HEX_STRING]
+                        [-arc {none,easy,normal,hard}] [-car {none,1st,2nd,3rd,4th,5th,6th}]
+                        [-lic {none,kid,bronze,silver,gold}] [-money MONEY]
+                        [-days DAYS] [-races RACES] [-wins WINS] [-rank BEST_RANK RANK]
+                        [-prize PRIZE] [-cur CAR_INDEX] [-edit CAR_INDEX HEX_STRING]
 
 options:
   -h, --help                           show this help message and exit
