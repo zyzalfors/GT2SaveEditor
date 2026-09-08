@@ -1,7 +1,6 @@
 import binascii, csv, os
 
 class GT2SaveEditor:
-    RAW_MAGIC = b"\xAC\x14"
     SC_MAGIC = b"\x53\x43"
     MC_MAGIC = b"\x4D\x43"
     PSV_MAGIC = b"\x00\x56\x53\x50"
