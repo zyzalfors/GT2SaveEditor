@@ -8,11 +8,11 @@ The tool can read various properties such as game id, checksum, money, language,
 It also allows editing of properties like money, language, days, races, wins, rankings, prize, licenses, current car, car data, and career/arcade progress.
 
 ```
-usage: GT2SaveEditor.py [-h] [-path PATH] [-save {0,1,2}] [-read] [-lang {ja,en-us,en-gb,fr,de,it,es}]
-                        [-arc {none,easy,normal,hard}] [-car {none,1st,2nd,3rd,4th,5th,6th}]
-                        [-lic {none,kid,bronze,silver,gold}] [-money MONEY]
-                        [-days DAYS] [-races RACES] [-wins WINS] [-rank BEST_RANK RANK]
-                        [-prize PRIZE] [-cur CAR_INDEX] [-edit CAR_INDEX HEX_STRING]
+usage: GT2SaveEditorMain.py [-h] [-path PATH] [-save {0,1,2}] [-read] [-lang {ja,en-us,en-gb,fr,de,it,es}]
+                            [-arc {none,easy,normal,hard}] [-car {none,1st,2nd,3rd,4th,5th,6th}]
+                            [-lic {none,kid,bronze,silver,gold}] [-money MONEY]
+                            [-days DAYS] [-races RACES] [-wins WINS] [-rank BEST_RANK RANK]
+                            [-prize PRIZE] [-cur CAR_INDEX] [-edit CAR_INDEX HEX_STRING]
 
 options:
   -h, --help                           show this help message and exit
