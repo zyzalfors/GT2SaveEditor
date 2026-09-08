@@ -94,12 +94,6 @@ class GT2SaveEditor:
         self.format = "Unknown"
         self.saves = []
 
-        if len(self.data) >= self.RAW_SAVE_SIZE:
-            if self.data.startswith(self.RAW_MAGIC):
-                self.format = "RAW"
-                self.saves.append((0, None, None, None))
-                return
-
         if len(self.data) >= self.SC_HEADER_SIZE + self.RAW_SAVE_SIZE:
             if self.data.startswith(self.SC_MAGIC):
                 self.format = "SC"
@@ -337,7 +331,7 @@ class GT2SaveEditor:
 
 
     def calcCrc32(self, startOffset):
-        data = self.data[startOffset:startOffset + self.CRC32_OFFSET]
+        data = self.data[startOffset - self.SC_HEADER_SIZE:startOffset + self.CRC32_OFFSET]
         return binascii.crc32(data)
 
 
