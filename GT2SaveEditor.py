@@ -17,7 +17,9 @@ class GT2SaveEditor:
 
     RAW_SAVE_SIZE = 31904
 
-    SERIALS = {"SCES-02380": "EU", "SCES-12380": "EU", "SCUS-94455": "US", "SCUS-94488": "US", "SCPS-10116": "JP", "SCPS-10117": "JP"}
+    SERIALS = {"SCES-02380": "EU", "SCES-12380": "EU",
+               "SCUS-94455": "US", "SCUS-94488": "US", "SCUS-94588": "US",
+               "SCPS-10116": "JP", "SCPS-10117": "JP", "SCPS-45457": "JP", "SCPS-45458": "JP", "SCAJ-01001": "JP", "SCAJ-01002": "JP", "SCPS-91326": "JP", "SCPS-91327": "JP"}
 
     LANG_OFFSET = 0
     LANGUAGES = {"ja": 0, "en-us": 1, "en-gb": 2, "fr": 3, "de": 4, "it": 5, "es": 6}
