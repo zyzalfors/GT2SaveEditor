@@ -17,7 +17,7 @@ class GT2SaveEditor:
 
     RAW_SAVE_SIZE = 31904
 
-    SERIALS = {"SCES-02380GAME": "EU", "SCES-12380GAME": "EU", "SCUS-94455GAME": "US", "SCUS-94488GAME": "US", "SCPS-10116GAME": "JP", "SCPS-10117GAME": "JP"}
+    SERIALS = {"SCES-02380": "EU", "SCES-12380": "EU", "SCUS-94455": "US", "SCUS-94488": "US", "SCPS-10116": "JP", "SCPS-10117": "JP"}
 
     LANG_OFFSET = 0
     LANGUAGES = {"ja": 0, "en-us": 1, "en-gb": 2, "fr": 3, "de": 4, "it": 5, "es": 6}
@@ -101,7 +101,7 @@ class GT2SaveEditor:
 
         if len(self.data) >= self.PSV_HEADER_SIZE + self.SC_HEADER_SIZE + self.RAW_SAVE_SIZE:
             if self.data.startswith(self.PSV_MAGIC):
-                serial = self.data[102:116].decode("ASCII")
+                serial = self.data[102:112].decode("ASCII")
 
                 if serial in self.SERIALS:
                     self.format = "PSV"
@@ -121,7 +121,7 @@ class GT2SaveEditor:
             for i in range(1, self.MC_BLOCK_COUNT):
                 headerOffset = gmeShift + self.MC_HEADER_SIZE * i
                 headerBytes = self.data[headerOffset:headerOffset + self.MC_HEADER_SIZE]
-                serial = headerBytes[12:26].decode("ASCII")
+                serial = headerBytes[12:22].decode("ASCII")
 
                 if headerBytes[0] == 0x51 and serial in self.SERIALS:
                     self.saves.append((gmeShift + self.MC_BLOCK_SIZE * i + self.SC_HEADER_SIZE, headerOffset + 12, serial, self.SERIALS[serial]))
