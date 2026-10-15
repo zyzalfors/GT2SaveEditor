@@ -8,6 +8,7 @@ The tool can read and modify several game parameters:
 * Arcade progress: events and bonuses
 
 More details about Gran Turismo 2 save files can be found in the following resources:
+- https://adamdadeh.github.io/fun/2019/03/28/binary_files
 - https://web.archive.org/web/20010613205439/http://ubb.granturismo.com/Forum18/HTML/000929.html
 - https://web.archive.org/web/20080221203449/http://www.rogs.dial.pipex.com/indexref.htm
 - https://web.archive.org/web/20190823163405/http://www.angelfire.com/fl4/JuanDon/SaveFileFormat.html

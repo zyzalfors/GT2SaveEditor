@@ -51,11 +51,11 @@ class GT2SaveEditorForm(tkinter.Tk):
 
 
     def initGeneralTab(self, nb):
-        tab = Tab(nb, 300, 150)
+        tab = Tab(nb, 300, 180)
         nb.add(tab, text = "General")
         vals = tuple(GT2Save.LANGUAGES.keys())
 
-        for i, name in enumerate(["Path", "Serial", "Region", "CRC32", "Language"]):
+        for i, name in enumerate(["Path", "Slot", "Serial", "Region", "CRC32", "Language"]):
             label = tkinter.Label(tab.content, text = f"{name}:")
             label.place(x = 10, y = 5 + i * 30)
 
@@ -262,6 +262,7 @@ class GT2SaveEditorForm(tkinter.Tk):
 
     def print(self):
         saveData = self.parser.read(self.slot)
+        self.data["Slot"].setVal(str(self.slot))
         for name in saveData:
             if isinstance(saveData[name], int) or isinstance(saveData[name], str):
                 self.data[name].setVal(saveData[name])
