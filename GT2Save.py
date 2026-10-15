@@ -1,31 +1,13 @@
-import binascii, csv, os
+import binascii, enum
 
-class GT2SaveEditor:
-    SC_MAGIC = b"\x53\x43"
-    MC_MAGIC = b"\x4D\x43"
-    PSV_MAGIC = b"\x00\x56\x53\x50"
-    GME_MAGIC = b"\x31\x32\x33\x2D\x34\x35\x36\x2D\x53\x54\x44"
-
+class GT2Save:
     SC_HEADER_SIZE = 512
-    MC_HEADER_SIZE = 128
-    PSV_HEADER_SIZE = 132
-    GME_HEADER_SIZE = 3904
 
-    MC_BLOCK_COUNT = 16
-    MC_BLOCK_SIZE = 8192
-    MC_SIZE = 131072
-
-    RAW_SAVE_SIZE = 31904
-
-    SERIALS = {"SCES-02380": "EU", "SCES-12380": "EU",
-               "SCUS-94455": "US", "SCUS-94488": "US", "SCUS-94588": "US",
-               "SCPS-10116": "JP", "SCPS-10117": "JP", "SCPS-45457": "JP", "SCPS-45458": "JP", "SCAJ-01001": "JP", "SCAJ-01002": "JP", "SCPS-91326": "JP", "SCPS-91327": "JP"}
-
-    LANG_OFFSET = 0
-    LANGUAGES = {"ja": 0, "en-us": 1, "en-gb": 2, "fr": 3, "de": 4, "it": 5, "es": 6}
+    LANGUAGE_OFFSET = 0
+    LANGUAGES = {"JA": 0, "EN-US": 1, "EN-GB": 2, "FR": 3, "DE": 4, "IT": 5, "ES": 6}
 
     ARCADE_PROGRESS_OFFSET = 184
-    ARCADE_PROGRESS = {"none": 0, "easy": 1, "normal": 2, "hard": 4}
+    ARCADE_PROGRESS = {"None": 0, "Easy": 1, "Normal": 2, "Hard": 4}
     ARCADE_TRACKS = ["Rome", "Rome Short", "Rome Night", "Seattle", "Seattle Short", "Super Speedway", "Laguna Seca",
                      "Midfield", "Apricot Hill", "Red Rock Valley", "Tahiti Road", "High Speed Ring", "Autumn Ring", "Trial Mountain",
                      "Deep Forest", "Grand Valley", "Grand Valley East", "Special Stage Route 5", "Clubman Stage Route 5", "Grindelwald", "Test Course"]
@@ -48,16 +30,15 @@ class GT2SaveEditor:
     PRIZE_OFFSET = 276
     PRIZE_SIZE = 4
 
-    CAREER_PROGRESS_OFFSET = 280
-    CAREER_PROGRESS = {"none": 0, "1st": 1, "2nd": 2, "3rd": 3, "4th": 4, "5th": 5, "6th": 6}
-    CAREER_EVENTS = 248
-    CAREER_EVENTS_FOR_100 = 219
+    EVENT_PROGRESS_OFFSET = 280
+    EVENT_PROGRESS = {"None": 0, "1st": 1, "2nd": 2, "3rd": 3, "4th": 4, "5th": 5, "6th": 6}
+    EVENT_COUNT = 248
 
     ENDING_MOVIE_OFFSET = 533
     ENDING_MOVIE_SIZE = 1
 
-    LICENSE_OFFSETS = {"S": 5145, "IA": 6785, "IB": 8425, "IC": 10065, "A": 11705, "B": 13345}
-    LICENSE_PROGRESS = {"none": 0, "kid": 1, "bronze": 2, "silver": 3, "gold": 4}
+    LICENSE_PROGRESS_OFFSETS = {"S": 5145, "IA": 6785, "IB": 8425, "IC": 10065, "A": 11705, "B": 13345}
+    LICENSE_PROGRESS = {"None": 0, "Kid": 1, "Bronze": 2, "Silver": 3, "Gold": 4}
     TESTS_PER_LICENSE = 10
     LICENSE_SKIP = 164
 
@@ -67,397 +48,314 @@ class GT2SaveEditor:
 
     FIRST_CAR_OFFSET = 15480
     CAR_SIZE = 164
-    CAR_PROPERTIES = {"Code": (0, 4)}
-    CARS_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "carsDB.csv")
+    CAR_PROPERTIES = {"Code 1": (0, 4), "Color": (4, 1), "Wheels 1": (8, 4), "Brakes": (12, 2), "Brake Controller": (14, 2), "Steer": (16, 2), "Chassis": (18, 2), "Engine": (20, 2),
+                      "Drivetrain": (22, 2), "Transmission": (24, 2), "Suspension": (26, 2), "LSD": (28, 2), "Front Tyres": (30, 2), "Rear Tyres": (32, 2), "Weight Reduction": (34, 2), "Race Modify": (36, 2),
+                      "Port Polish": (38, 2), "Engine Balancing": (40, 2), "Displacement Increase": (42, 2), "ECU": (44, 2), "N\\A Tune": (46, 2), "Turbo Tune": (48, 2), "Flywheel": (50, 2), "Clutch": (52, 2),
+                      "Shaft": (54, 2), "Muffler": (56, 2), "Intercooler": (58, 2), "ASC": (60, 2), "TCS": (62, 2), "Wheels 2": (64, 2), "Power Modifier": (66, 2), "R Gear": (68, 2),
+                      "1 Gear": (70, 2), "2 Gear": (72, 2), "3 Gear": (74, 2), "4 Gear": (76, 2), "5 Gear": (78, 2), "6 Gear": (80, 2), "7 Gear": (82, 2), "Final Gear": (84, 2),
+                      "Auto Gear": (86, 1), "Split Torque": (87, 1), "Front Brakes": (88, 1), "Rear Brakes": (89, 1), "Front Downforce": (90, 1), "Rear Downforce": (91, 1), "Turbo 1": (92, 4), "Turbo 2": (96, 2),
+                      "Front Camber": (98, 1), "Rear Camber": (99, 1), "Front Height": (100, 1), "Rear Height": (101, 1), "Front Toe": (102, 1), "Rear Toe": (103, 1), "Front Spring Rate": (104, 1), "Rear Spring Rate": (105, 1),
+                      "Front Spring Frequency": (106, 1), "Rear Spring Frequency": (107, 1), "Front Bound": (108, 2), "Front Rebound": (110, 2), "Rear Bound": (112, 2), "Rear Rebound": (114, 2), "Front Stabilizer": (116, 1), "Rear Stabilizer": (117, 1),
+                      "Front Initial LSD": (118, 1), "Rear Initial LSD": (119, 1), "Front Accel LSD": (120, 1), "Rear Accel LSD": (121, 1), "Front Decel LSD": (122, 1), "Rear Decel LSD": (123, 1), "ASC Level": (124, 1), "TCS Level": (125, 1),
+                      "Engine Sound 1": (126, 2), "Engine Sound 2": (128, 1), "Manufacturer": (129, 1), "Aspiration": (130, 1), "Gear Auto Setting At Last Gear": (131, 1), "Final Drive Ratio At Last Gear": (132, 2), "Front Tyres Upgrade Level At Last Gear": (134, 2), "Rear Tyres Upgrade Level At Last Gear": (136, 2),
+                      "Code 2": (140, 4), "Car Price": (144, 4), "Displayed Weight": (148, 2), "Displayed Torque": (150, 2), "Displayed Horsepower And Flags": (152, 2), "Purchased Parts": (154, 8), "Cleanliness": (162, 2)}
 
     MONEY_OFFSET = 31880
     MONEY_SIZE = 4
 
-    CURR_CAR_OFFSET = 31884
-    CURR_CAR_SIZE = 1
-
     CRC32_OFFSET = 31900
     CRC32_SIZE = 4
 
-    INVALID_STR = "invalid"
+    class DataType(enum.Enum):
+        LANGUAGE = 0
+        ARCADE_PROGRESS = 1
+        DAYS = 2
+        RACES = 3
+        WINS = 4
+        SUM_OF_BEST_RANKINGS = 5
+        SUM_OF_RANKINGS = 6
+        PRIZE = 7
+        EVENT_PROGRESS = 8
+        ENDING_MOVIE = 9
+        LICENSE_PROGRESS = 10
+        CAR_COUNT = 11
+        CARS = 12
+        MONEY = 13
+        CRC32 = 14
 
 
-    def __init__(self, path):
-        self.path = path
-
-        with open(self.path, "rb") as f:
-            self.data = bytearray(f.read())
-
-        self.parse()
+    def __init__(self, startOffset, serial, region, data):
+        self.startOffset = startOffset
+        self.serial = serial
+        self.region = region
+        self.data = data
 
 
-    def parse(self):
-        self.format = "Unknown"
-        self.saves = []
-
-        if len(self.data) >= self.SC_HEADER_SIZE + self.RAW_SAVE_SIZE:
-            if self.data.startswith(self.SC_MAGIC):
-                self.format = "SC"
-                self.saves.append((self.SC_HEADER_SIZE, None, None, None))
-                return
-
-        if len(self.data) >= self.PSV_HEADER_SIZE + self.SC_HEADER_SIZE + self.RAW_SAVE_SIZE:
-            if self.data.startswith(self.PSV_MAGIC):
-                serial = self.data[102:112].decode("ASCII")
-
-                if serial in self.SERIALS:
-                    self.format = "PSV"
-                    self.saves.append((self.PSV_HEADER_SIZE + self.SC_HEADER_SIZE, 102, serial, self.SERIALS[serial]))
-                    return
-
-        gmeShift = None
-        if len(self.data) >= self.MC_SIZE and self.data.startswith(self.MC_MAGIC):
-            self.format = "MC"
-            gmeShift = 0
-
-        if len(self.data) >= self.GME_HEADER_SIZE + self.MC_SIZE and self.data.startswith(self.GME_MAGIC):
-            self.format = "GME"
-            gmeShift = self.GME_HEADER_SIZE
-
-        if gmeShift is not None:
-            for i in range(1, self.MC_BLOCK_COUNT):
-                headerOffset = gmeShift + self.MC_HEADER_SIZE * i
-                headerBytes = self.data[headerOffset:headerOffset + self.MC_HEADER_SIZE]
-                serial = headerBytes[12:22].decode("ASCII")
-
-                if headerBytes[0] == 0x51 and serial in self.SERIALS:
-                    self.saves.append((gmeShift + self.MC_BLOCK_SIZE * i + self.SC_HEADER_SIZE, headerOffset + 12, serial, self.SERIALS[serial]))
+    def getLanguage(self):
+        b = self.data[self.startOffset + self.LANGUAGE_OFFSET]
+        return next((lang for lang, byte in self.LANGUAGES.items() if b == byte), "")
 
 
-    def getLang(self, startOffset):
-        offset = startOffset + self.LANG_OFFSET
-        byte = self.data[offset]
-        return offset, next((lang for lang, langByte in self.LANGUAGES.items() if byte == langByte), self.INVALID_STR)
+    def updateLanguage(self, lang):
+        if lang not in self.LANGUAGES:
+            raise ValueError(f"Invalid language '{lang}'")
+
+        self.data[self.startOffset + self.LANGUAGE_OFFSET] = self.LANGUAGES[lang]
 
 
-    def updateLang(self, startOffset, lang):
-        if not lang in self.LANGUAGES:
-            return
-
-        self.data[startOffset + self.LANG_OFFSET] = self.LANGUAGES[lang]
-
-
-    def getArcadeProg(self, startOffset):
-        offset = startOffset + self.ARCADE_PROGRESS_OFFSET
+    def getArcadeProgress(self):
         progress = []
 
         for i in range(len(self.ARCADE_TRACKS)):
-            byte = self.data[offset + i]
-            prog = next((prog for prog, progByte in self.ARCADE_PROGRESS.items() if byte == progByte), self.INVALID_STR)
-            progress.append((self.ARCADE_TRACKS[i], prog))
+            b = self.data[self.startOffset + self.ARCADE_PROGRESS_OFFSET + i]
+            progress.append(next((prog for prog, byte in self.ARCADE_PROGRESS.items() if b == byte), "None"))
 
-        return offset, progress
+        return progress
 
 
-    def updateArcadeProg(self, startOffset, prog):
-        if not prog in self.ARCADE_PROGRESS:
-            return
-
-        offset = startOffset + self.ARCADE_PROGRESS_OFFSET
-        byte = self.ARCADE_PROGRESS[prog]
+    def updateArcadeProgress(self, progress):
+        if len(progress) != len(self.ARCADE_TRACKS):
+            raise ValueError(f"Invalid length '{len(progress)}' for arcade progress")
 
         for i in range(len(self.ARCADE_TRACKS)):
-            self.data[offset + i] = byte
+            if progress[i] not in self.ARCADE_PROGRESS:
+                raise ValueError(f"Invalid arcade progress '{progress[i]}'")
+
+            self.data[self.startOffset + self.ARCADE_PROGRESS_OFFSET + i] = self.ARCADE_PROGRESS[progress[i]]
 
 
-    def getVal(self, startOffset, valOffset, valSize, signed):
-        offset = startOffset + valOffset
-        data = self.data[offset:offset + valSize]
-        return offset, int.from_bytes(data, byteorder = "little", signed = signed)
+    def getVal(self, valOffset, valSize, signed):
+        return int.from_bytes(bytes = self.data[self.startOffset + valOffset:self.startOffset + valOffset + valSize], byteorder = "little", signed = signed)
 
 
-    def updateVal(self, startOffset, valOffset, valSize, signed, val):
-        if val is None:
-            return
-
-        offset = startOffset + valOffset
-        data = int(val).to_bytes(valSize, byteorder = "little", signed = signed)
-
+    def updateVal(self, valOffset, valSize, signed, val):
+        valBytes = int(val).to_bytes(length = valSize, byteorder = "little", signed = signed)
         for i in range(valSize):
-            self.data[offset + i] = data[i]
+            self.data[self.startOffset + valOffset + i] = valBytes[i]
 
 
-    def getCareerProg(self, startOffset):
-        offset = startOffset + self.CAREER_PROGRESS_OFFSET
+    def getEventProgress(self):
         progress = []
-        completion = 0
 
-        for i in range(int(self.CAREER_EVENTS / 2)):
-            byte = self.data[offset + i]
+        for i in range(self.EVENT_COUNT // 2):
+            b = self.data[self.startOffset + self.EVENT_PROGRESS_OFFSET + i]
 
-            nibble = byte & 0x0F
-            ranking = next((prog for prog, progNibble in self.CAREER_PROGRESS.items() if nibble == progNibble), self.INVALID_STR)
-            progress.append(ranking)
+            n = b & 0x0F
+            progress.append(next((prog for prog, nibble in self.EVENT_PROGRESS.items() if n == nibble), "None"))
 
-            if ranking != self.INVALID_STR and nibble != 0:
-                completion += 1 / nibble
+            n = (b >> 4) & 0x0F
+            progress.append(next((prog for prog, nibble in self.EVENT_PROGRESS.items() if n == nibble), "None"))
 
-            nibble = (byte & 0xF0) >> 4
-            ranking = next((prog for prog, progNibble in self.CAREER_PROGRESS.items() if nibble == progNibble), self.INVALID_STR)
-            progress.append(ranking)
-
-            if ranking != self.INVALID_STR and nibble != 0:
-                completion += 1 / nibble
-
-        return offset, progress, round(completion * 100 / self.CAREER_EVENTS_FOR_100, 2)
+        return progress
 
 
-    def updateCareerProg(self, startOffset, prog):
-        if not prog in self.CAREER_PROGRESS:
-            return
+    def updateEventProgress(self, progress):
+        if len(progress) != self.EVENT_COUNT:
+            raise ValueError(f"Invalid length '{len(progress)}' for event progress")
 
-        offset = startOffset + self.CAREER_PROGRESS_OFFSET
-        nibble = self.CAREER_PROGRESS[prog]
+        for i in range(0, self.EVENT_COUNT, 2):
+            if progress[i] not in self.EVENT_PROGRESS:
+                raise ValueError(f"Invalid event progress '{progress[i]}'")
+            if progress[i + 1] not in self.EVENT_PROGRESS:
+                raise ValueError(f"Invalid event progress '{progress[i + 1]}'")
 
-        for i in range(int(self.CAREER_EVENTS / 2)):
-            self.data[offset + i] = (nibble << 4) | nibble
+            n1, n2 = self.EVENT_PROGRESS[progress[i]], self.EVENT_PROGRESS[progress[i + 1]]
+            self.data[self.startOffset + self.EVENT_PROGRESS_OFFSET + i // 2] = n1 | (n2 << 4)
 
 
-    def getLicenseProg(self, startOffset):
-        licenses = []
+    def getLicenseProgress(self):
+        progress = {}
 
-        for lic in self.LICENSE_OFFSETS:
-            offset = startOffset + self.LICENSE_OFFSETS[lic]
-            licData = [str(offset), lic]
+        for licName in self.LICENSE_PROGRESS_OFFSETS:
+            progress[licName] = []
 
             for i in range(self.TESTS_PER_LICENSE):
-                byte = self.data[offset + self.LICENSE_SKIP * i]
-                licData.append(next((prog for prog, progByte in self.LICENSE_PROGRESS.items() if byte == progByte), self.INVALID_STR))
+                b = self.data[self.startOffset + self.LICENSE_PROGRESS_OFFSETS[licName] + self.LICENSE_SKIP * i]
+                progress[licName].append(next((prog for prog, byte in self.LICENSE_PROGRESS.items() if b == byte), "None"))
 
-            licenses.append(licData)
-
-        return licenses
+        return progress
 
 
-    def updateLicenseProg(self, startOffset, prog):
-        if not prog in self.LICENSE_PROGRESS:
-            return
+    def updateLicenseProgress(self, progress):
+        if set(progress.keys()) != set(self.LICENSE_PROGRESS_OFFSETS.keys()):
+            raise ValueError("Invalid license progress")
 
-        offset = startOffset + self.LICENSE_OFFSETS["S"]
-        byte = self.LICENSE_PROGRESS[prog]
+        for licName in progress:
+            if len(progress[licName]) != self.TESTS_PER_LICENSE:
+                raise ValueError(f"Invalid length '{len(progress[licName])}' for progress of license '{licName}'")
 
-        for i in range(self.TESTS_PER_LICENSE * len(self.LICENSE_OFFSETS)):
-            self.data[offset + self.LICENSE_SKIP * i] = byte
+            for i in range(self.TESTS_PER_LICENSE):
+                prog = progress[licName][i]
+                if prog not in self.LICENSE_PROGRESS:
+                    raise ValueError(f"Invalid license progress '{prog}' for license '{licName}'")
 
-
-    def getCars(self, startOffset):
-        def getCarName(csvData, code, region):
-            for entry in csvData:
-                if entry[0] == code and region == "EU":
-                    return entry[1]
-
-                elif entry[0] == code and region == "US":
-                    return entry[2]
-
-                elif entry[0] == code and region == "JP":
-                    return entry[3]
-
-            return self.INVALID_STR
+                self.data[self.startOffset + self.LICENSE_PROGRESS_OFFSETS[licName] + self.LICENSE_SKIP * i] = self.LICENSE_PROGRESS[prog]
 
 
+    def getCars(self):
+        carCount = min(self.get(GT2Save.DataType.CAR_COUNT), self.MAX_CAR_COUNT)
         cars = []
-        _, carCount = self.getVal(startOffset, self.CAR_COUNT_OFFSET, self.CAR_COUNT_SIZE, False)
-
-        if carCount > self.MAX_CAR_COUNT:
-            carCount = self.MAX_CAR_COUNT
-
-        if carCount == 0:
-            return cars
-
-        csvData = None
-        with open(self.CARS_DB_PATH, encoding = "UTF-8", newline = "") as f:
-            csvData = list(csv.reader(f, delimiter = ","))
-
-        save = next(save for save in self.saves if save[0] == startOffset)
-        region = save[3] if save[3] else "EU"
-        codeAttr = self.CAR_PROPERTIES["Code"]
 
         for i in range(carCount):
-            offset = startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * i
-            data = self.data[offset:offset + self.CAR_SIZE]
+            car = {}
 
-            hexBytes = binascii.hexlify(data).decode("ASCII").upper()
-            code = binascii.hexlify(data[codeAttr[0]:codeAttr[0] + codeAttr[1]]).decode("ASCII").upper()
+            for propName in self.CAR_PROPERTIES:
+                prop = self.CAR_PROPERTIES[propName]
+                propOffset, propSize = prop[0], prop[1]
+                car[propName] = self.data[self.startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * i + propOffset:self.startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * i + propOffset + propSize].hex().upper()
 
-            cars.append((str(offset), str(i), getCarName(csvData, code, region), hexBytes))
+            cars.append(car)
 
         return cars
 
 
-    def updateCar(self, startOffset, index, hexBytes):
-        if index is None or not hexBytes or len(hexBytes) % 2 != 0:
-            return
+    def updateCars(self, cars):
+        newCarCount = min(len(cars), self.MAX_CAR_COUNT)
+        self.update(GT2Save.DataType.CAR_COUNT, newCarCount)
 
-        index = int(index)
-        _, carCount = self.getVal(startOffset, self.CAR_COUNT_OFFSET, self.CAR_COUNT_SIZE, False)
+        for i in range(self.CAR_SIZE * self.MAX_CAR_COUNT):
+            self.data[self.startOffset + self.FIRST_CAR_OFFSET + i] = 0
 
-        if carCount > self.MAX_CAR_COUNT:
-            carCount = self.MAX_CAR_COUNT
+        for i in range(newCarCount):
+            car = cars[i]
+            if set(car.keys()) != set(self.CAR_PROPERTIES.keys()):
+                raise ValueError(f"Invalid car {i} data")
 
-        if index < 0 or index > carCount - 1:
-            if carCount == self.MAX_CAR_COUNT:
+            for propName in car:
+                prop = self.CAR_PROPERTIES[propName]
+                propOffset, propSize = prop[0], prop[1]
+                propVal = car[propName]
+
+                if len(propVal) != propSize * 2:
+                    raise ValueError(f"Invalid length '{len(propVal)}' for car property '{propName}' of car {i} data")
+
+                propValBytes = bytearray.fromhex(propVal)
+                for j in range(propSize):
+                    self.data[self.startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * i + propOffset + j] = propValBytes[j]
+
+
+    def calcCrc32(self):
+        return binascii.crc32(self.data[self.startOffset - self.SC_HEADER_SIZE:self.startOffset + self.CRC32_OFFSET])
+
+
+    def updateCrc32(self):
+        self.update(GT2Save.DataType.CRC32, self.calcCrc32())
+
+
+    def validCrc32(self):
+        return self.get(GT2Save.DataType.CRC32) == self.calcCrc32()
+
+
+    def get(self, dataType):
+        match dataType:
+            case GT2Save.DataType.LANGUAGE:
+                return self.getLanguage()
+
+            case GT2Save.DataType.ARCADE_PROGRESS:
+                return self.getArcadeProgress()
+
+            case GT2Save.DataType.DAYS:
+                return self.getVal(self.DAYS_OFFSET, self.DAYS_SIZE, True)
+
+            case GT2Save.DataType.RACES:
+                return self.getVal(self.RACES_OFFSET, self.RACES_SIZE, True)
+
+            case GT2Save.DataType.WINS:
+                return self.getVal(self.WINS_OFFSET, self.WINS_SIZE, True)
+
+            case GT2Save.DataType.SUM_OF_BEST_RANKINGS:
+                return self.getVal(self.SUM_OF_BEST_RANKINGS_OFFSET, self.SUM_OF_BEST_RANKINGS_SIZE, True)
+
+            case GT2Save.DataType.SUM_OF_RANKINGS:
+                return self.getVal(self.SUM_OF_RANKINGS_OFFSET, self.SUM_OF_RANKINGS_SIZE, True)
+
+            case GT2Save.DataType.PRIZE:
+                return self.getVal(self.PRIZE_OFFSET, self.PRIZE_SIZE, True)
+
+            case GT2Save.DataType.EVENT_PROGRESS:
+               return self.getEventProgress()
+
+            case GT2Save.DataType.ENDING_MOVIE:
+                return bool(self.getVal(self.ENDING_MOVIE_OFFSET, self.ENDING_MOVIE_SIZE, False))
+
+            case GT2Save.DataType.LICENSE_PROGRESS:
+                return self.getLicenseProgress()
+
+            case GT2Save.DataType.CAR_COUNT:
+                return self.getVal(self.CAR_COUNT_OFFSET, self.CAR_COUNT_SIZE, False)
+
+            case GT2Save.DataType.CARS:
+                return self.getCars()
+
+            case GT2Save.DataType.MONEY:
+                return self.getVal(self.MONEY_OFFSET, self.MONEY_SIZE, True)
+
+            case GT2Save.DataType.CRC32:
+                return self.getVal(self.CRC32_OFFSET, self.CRC32_SIZE, False)
+
+        raise ValueError("Invalid data type")
+
+
+    def update(self, dataType, data):
+        match dataType:
+            case GT2Save.DataType.LANGUAGE:
+                self.updateLanguage(data)
                 return
 
-            else:
-                index = carCount
-                self.updateVal(startOffset, self.CAR_COUNT_OFFSET, self.CAR_COUNT_SIZE, False, carCount + 1)
+            case GT2Save.DataType.ARCADE_PROGRESS:
+                self.updateArcadeProgress(data)
+                return
 
-        offset = startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * index
-        data = binascii.unhexlify(hexBytes)
-        size = min(len(data), self.CAR_SIZE)
+            case GT2Save.DataType.DAYS:
+                self.updateVal(self.DAYS_OFFSET, self.DAYS_SIZE, True, data)
+                return
 
-        for i in range(size):
-            self.data[offset + i] = data[i]
+            case GT2Save.DataType.RACES:
+                self.updateVal(self.RACES_OFFSET, self.RACES_SIZE, True, data)
+                return
 
+            case GT2Save.DataType.WINS:
+                self.updateVal(self.WINS_OFFSET, self.WINS_SIZE, True, data)
+                return
 
-    def updateCurrCar(self, startOffset, index):
-        if index is None:
-            return
+            case GT2Save.DataType.SUM_OF_BEST_RANKINGS:
+                self.updateVal(self.SUM_OF_BEST_RANKINGS_OFFSET, self.SUM_OF_BEST_RANKINGS_SIZE, True, data)
+                return
 
-        index = int(index)
-        _, carCount = self.getVal(startOffset, self.CAR_COUNT_OFFSET, self.CAR_COUNT_SIZE, False)
+            case GT2Save.DataType.SUM_OF_RANKINGS:
+                self.updateVal(self.SUM_OF_RANKINGS_OFFSET, self.SUM_OF_RANKINGS_SIZE, True, data)
+                return
 
-        if carCount > self.MAX_CAR_COUNT:
-            carCount = self.MAX_CAR_COUNT
+            case GT2Save.DataType.PRIZE:
+                self.updateVal(self.PRIZE_OFFSET, self.PRIZE_SIZE, True, data)
+                return
 
-        if index < 0 or index > carCount - 1:
-            index = 255
+            case GT2Save.DataType.EVENT_PROGRESS:
+               self.updateEventProgress(data)
+               return
 
-        self.updateVal(startOffset, self.CURR_CAR_OFFSET, self.CURR_CAR_SIZE, False, index)
+            case GT2Save.DataType.ENDING_MOVIE:
+                self.updateVal(self.ENDING_MOVIE_OFFSET, self.ENDING_MOVIE_SIZE, False, data)
+                return
 
+            case GT2Save.DataType.LICENSE_PROGRESS:
+                self.updateLicenseProgress(data)
+                return
 
-    def calcCrc32(self, startOffset):
-        data = self.data[startOffset - self.SC_HEADER_SIZE:startOffset + self.CRC32_OFFSET]
-        return binascii.crc32(data)
+            case GT2Save.DataType.CAR_COUNT:
+                self.updateVal(self.CAR_COUNT_OFFSET, self.CAR_COUNT_SIZE, False, data)
+                return
 
+            case GT2Save.DataType.CARS:
+                self.updateCars(data)
+                return
 
-    def updateCrc32(self, startOffset):
-        crc32 = self.calcCrc32(startOffset)
-        self.updateVal(startOffset, self.CRC32_OFFSET, self.CRC32_SIZE, False, crc32)
+            case GT2Save.DataType.MONEY:
+                self.updateVal(self.MONEY_OFFSET, self.MONEY_SIZE, True, data)
+                return
 
+            case GT2Save.DataType.CRC32:
+                self.updateVal(self.CRC32_OFFSET, self.CRC32_SIZE, False, data)
+                return
 
-    def checkCrc32(self, startOffset):
-        _, crc32 = self.getVal(startOffset, self.CRC32_OFFSET, self.CRC32_SIZE, False)
-        calcCrc32 = self.calcCrc32(startOffset)
-        return crc32 == calcCrc32
-
-
-    def read(self, index):
-        index = int(index) if index is not None else -1
-
-        for i in range(len(self.saves)):
-            if index >= 0 and i != index:
-                continue
-
-            save = self.saves[i]
-            startOffset = save[0]
-
-            print(f"Format: {self.format}")
-            print(f"Start offset: {startOffset}")
-
-            if save[1] and save[2] and save[3]:
-                print(f"Game serial at {save[1]}: {save[2]}")
-                print(f"Region: {save[3]}")
-
-            offset, val = self.getVal(startOffset, self.CRC32_OFFSET, self.CRC32_SIZE, False)
-            print(f"Checksum at {offset}: {val}")
-
-            val = self.checkCrc32(startOffset)
-            print(f"Valid checksum: {str(val).lower()}")
-
-            offset, val = self.getLang(startOffset)
-            print(f"Language at {offset}: {val}")
-
-            offset, val = self.getVal(startOffset, self.MONEY_OFFSET, self.MONEY_SIZE, True)
-            print(f"Money at {offset}: {val}")
-
-            offset, val = self.getVal(startOffset, self.DAYS_OFFSET, self.DAYS_SIZE, True)
-            print(f"Days at {offset}: {val}")
-
-            offset, val = self.getVal(startOffset, self.RACES_OFFSET, self.RACES_SIZE, True)
-            print(f"Races at {offset}: {val}")
-
-            offset, val = self.getVal(startOffset, self.WINS_OFFSET, self.WINS_SIZE, True)
-            print(f"Wins at {offset}: {val}")
-
-            offset, val = self.getVal(startOffset, self.SUM_OF_BEST_RANKINGS_OFFSET, self.SUM_OF_BEST_RANKINGS_SIZE, True)
-            print(f"Sum of best race rankings at {offset}: {val}")
-            bestRankings = val
-
-            offset, val = self.getVal(startOffset, self.SUM_OF_RANKINGS_OFFSET, self.SUM_OF_RANKINGS_SIZE, True)
-            print(f"Sum of race rankings at {offset}: {val}")
-            rankings = val
-
-            average = bestRankings / rankings if rankings != 0 else 0
-            print(f"Average race ranking: {average}")
-
-            offset, val = self.getVal(startOffset, self.PRIZE_OFFSET, self.PRIZE_SIZE, True)
-            print(f"Prize at {offset}: {val}")
-
-            val = self.getLicenseProg(startOffset)
-            for entry in val:
-                print(f"License {entry[1]} at {entry[0]}: {','.join(entry[2:])}")
-
-            offset, val = self.getArcadeProg(startOffset)
-            print(f"Arcade progress at {offset}:")
-            for entry in val:
-                print(f"{entry[0]}: {entry[1]}")
-
-            offset, val1, val2 = self.getCareerProg(startOffset)
-            print(f"Career progress at {offset}: {','.join(val1)}")
-            print(f"Career percentage: {val2}")
-
-            offset, val = self.getVal(startOffset, self.ENDING_MOVIE_OFFSET, self.ENDING_MOVIE_SIZE, False)
-            print(f"Ending movie unlocked at {offset}: {str(val > 0).lower()}")
-
-            offset, val = self.getVal(startOffset, self.CAR_COUNT_OFFSET, self.CAR_COUNT_SIZE, False)
-            print(f"Car count at {offset}: {val}")
-
-            offset, val = self.getVal(startOffset, self.CURR_CAR_OFFSET, self.CURR_CAR_SIZE, False)
-            if val >= self.MAX_CAR_COUNT:
-                val = "none"
-
-            print(f"Current car at {offset}: {val}")
-
-            val = self.getCars(startOffset)
-            if len(val) > 0:
-                print("Offset,Position,Name,Bytes")
-
-            for entry in val:
-                print(f"{','.join(entry)}")
-
-            print()
-
-
-    def update(self, index, vals):
-        index = int(index) if index is not None else -1
-
-        for i in range(len(self.saves)):
-            if index >= 0 and i != index:
-                continue
-
-            save = self.saves[i]
-            startOffset = save[0]
-
-            self.updateLang(startOffset, vals.lang)
-            self.updateArcadeProg(startOffset, vals.arc)
-            self.updateVal(startOffset, self.DAYS_OFFSET, self.DAYS_SIZE, True, vals.days)
-            self.updateVal(startOffset, self.RACES_OFFSET, self.RACES_SIZE, True, vals.races)
-            self.updateVal(startOffset, self.WINS_OFFSET, self.WINS_SIZE, True, vals.wins)
-            self.updateVal(startOffset, self.SUM_OF_BEST_RANKINGS_OFFSET, self.SUM_OF_BEST_RANKINGS_SIZE, True, vals.rank[0] if vals.rank else None)
-            self.updateVal(startOffset, self.SUM_OF_RANKINGS_OFFSET, self.SUM_OF_RANKINGS_SIZE, True, vals.rank[1] if vals.rank else None)
-            self.updateVal(startOffset, self.PRIZE_OFFSET, self.PRIZE_SIZE, True, vals.prize)
-            self.updateCareerProg(startOffset, vals.car)
-            self.updateLicenseProg(startOffset, vals.lic)
-            self.updateCar(startOffset, vals.edit[0] if vals.edit else None, vals.edit[1] if vals.edit else None)
-            self.updateVal(startOffset, self.MONEY_OFFSET, self.MONEY_SIZE, True, vals.money)
-            self.updateCurrCar(startOffset, vals.cur)
-            self.updateCrc32(startOffset)
-
-        with open(self.path, "wb") as f:
-            f.write(self.data)
+        raise ValueError("Invalid data type")
