@@ -89,7 +89,7 @@ class GT2SaveEditorForm(tkinter.Tk):
     def initCarsTab(self, nb):
         tab = ttk.Frame(nb)
         nb.add(tab, text = "Cars")
-        self.carsTable = Table(tab, tuple(GT2Save.CAR_PROPERTIES.keys()))
+        self.carsTable = Table(tab, tuple(GT2Save.CAR_PROPERTIES.keys()), self.importCars, self.exportCars)
         tab.rowconfigure(0, weight = 1)
         tab.columnconfigure(0, weight = 1)
 
@@ -310,16 +310,41 @@ class GT2SaveEditorForm(tkinter.Tk):
 
         saveData["Cars"] = self.carsTable.getAllRows()
 
-        try:
-            self.parser.update(saveData, self.slot)
-            self.print()
-            messagebox.showinfo("Info", "Save updated")
-            return True
+        #try:
+        self.parser.update(saveData, self.slot)
+        self.print()
+        messagebox.showinfo("Info", "Save updated")
+        return True
 
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
-            return False
+        #except Exception as e:
+        #    messagebox.showerror("Error", str(e))
+        #    return False
 
 
     def close(self):
         if self.update(): self.setGUI(False, True)
+
+
+    def importCars(self):
+        path = filedialog.askopenfilename(title = "Import cars")
+        if not path: return
+
+        n = 0
+        for car in self.parser.importCars(path):
+            if n == GT2Save.MAX_CAR_COUNT: break
+            self.carsTable.insertRow(car)
+            n += 1
+
+        self.data["Car count"].setVal(str(len(self.carsTable.get_children())))
+        messagebox.showinfo("Info", f"{n} car(s) imported")
+
+
+    def exportCars(self):
+        path = filedialog.asksaveasfilename(title = "Export cars")
+        if not path: return
+
+        selCars = self.carsTable.getSelectedRows()
+        with open(path, "wb") as f:
+            f.write(self.parser.exportCars(selCars))
+
+        messagebox.showinfo("Info", f"{len(selCars)} car(s) exported")

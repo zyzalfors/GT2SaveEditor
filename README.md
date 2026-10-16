@@ -4,7 +4,7 @@ This GUI tool allows users to read and edit save files for the PlayStation game 
 The tool can read and modify several game parameters:
 * General settings: language
 * Career progress: days, races, wins, money, prize, car count, sum of best rankings, sum of rankings, licenses, and events
-* Career cars: edit/delete individual cars
+* Career cars: edit/delete/import/export individual cars or entire garage
 * Arcade progress: events and bonuses
 
 More details about Gran Turismo 2 save files can be found in the following resources:

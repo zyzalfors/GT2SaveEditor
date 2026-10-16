@@ -127,3 +127,14 @@ class GT2SaveParser:
 
     def getSaveCount(self):
         return len(self.saves)
+
+
+    def importCars(self, path):
+        with open(path, "rb") as f:
+            carBytes = bytes(f.read())
+
+        return self.saves[0].importCars(carBytes)
+
+
+    def exportCars(self, cars):
+        return self.saves[0].exportCars(cars)

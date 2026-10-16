@@ -194,6 +194,18 @@ class GT2Save:
 
     def getCars(self):
         carCount = min(self.get(GT2Save.DataType.CAR_COUNT), self.MAX_CAR_COUNT)
+        return self.getStrCars(self.data, carCount, self.startOffset + self.FIRST_CAR_OFFSET)
+
+
+    def importCars(self, carBytes):
+        if len(carBytes) % self.CAR_SIZE != 0 or len(carBytes) == 0:
+            raise ValueError(f"Invalid file size '{len(carBytes)}'")
+
+        carCount = min(len(carBytes) // self.CAR_SIZE, self.MAX_CAR_COUNT)
+        return self.getStrCars(carBytes, carCount, 0)
+
+
+    def getStrCars(self, carBytes, carCount, start):
         cars = []
 
         for i in range(carCount):
@@ -202,7 +214,7 @@ class GT2Save:
             for propName in self.CAR_PROPERTIES:
                 prop = self.CAR_PROPERTIES[propName]
                 propOffset, propSize = prop[0], prop[1]
-                car[propName] = self.data[self.startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * i + propOffset:self.startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * i + propOffset + propSize].hex().upper()
+                car[propName] = carBytes[start + self.CAR_SIZE * i + propOffset:start + self.CAR_SIZE * i + propOffset + propSize].hex().upper()
 
             cars.append(car)
 
@@ -216,7 +228,20 @@ class GT2Save:
         for i in range(self.CAR_SIZE * self.MAX_CAR_COUNT):
             self.data[self.startOffset + self.FIRST_CAR_OFFSET + i] = 0
 
-        for i in range(newCarCount):
+        self.writeBinCars(self.data, newCarCount, self.startOffset + self.FIRST_CAR_OFFSET, cars)
+
+
+    def exportCars(self, cars):
+        if len(cars) == 0:
+            raise ValueError(f"Invalid length for car data '{len(cars)}'")
+
+        carBytes = bytearray(len(cars) * self.CAR_SIZE)
+        self.writeBinCars(carBytes, len(cars), 0, cars)
+        return carBytes
+
+
+    def writeBinCars(self, carBytes, carCount, start, cars):
+        for i in range(carCount):
             car = cars[i]
             if set(car.keys()) != set(self.CAR_PROPERTIES.keys()):
                 raise ValueError(f"Invalid car {i} data")
@@ -231,7 +256,7 @@ class GT2Save:
 
                 propValBytes = bytearray.fromhex(propVal)
                 for j in range(propSize):
-                    self.data[self.startOffset + self.FIRST_CAR_OFFSET + self.CAR_SIZE * i + propOffset + j] = propValBytes[j]
+                    carBytes[start + self.CAR_SIZE * i + propOffset + j] = propValBytes[j]
 
 
     def calcCrc32(self):

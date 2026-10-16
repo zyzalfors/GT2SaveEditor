@@ -58,6 +58,8 @@ class PopupMenu(tkinter.Menu):
         self.add_command(label = "Copy car", command = self.copyCar)
         self.add_command(label = "Paste car", command = self.pasteCar)
         self.add_command(label = "Delete cars", command = self.deleteCars)
+        self.add_command(label = "Import cars", command = self.importCars)
+        self.add_command(label = "Export cars", command = self.exportCars)
 
 
     def copyCar(self):
@@ -70,6 +72,14 @@ class PopupMenu(tkinter.Menu):
 
     def deleteCars(self):
         self.table.deleteSelectedRows()
+
+
+    def importCars(self):
+        self.table.importRows()
+
+
+    def exportCars(self):
+        self.table.exportRows()
 
 
 class Tab(ttk.Frame):
@@ -99,7 +109,7 @@ class Tab(ttk.Frame):
 
 class Table(ttk.Treeview):
 
-    def __init__(self, parent, columns):
+    def __init__(self, parent, columns, importRowsFunc, exportRowsFunc):
         super().__init__(master = parent, columns = columns, show = "headings")
 
         for column in columns:
@@ -119,6 +129,8 @@ class Table(ttk.Treeview):
         self.bind("<Button-3>", self.showPopup)
         self.popupMenu = PopupMenu(self)
         self.storedRow = None
+        self.importRowsFunc = importRowsFunc
+        self.exportRowsFunc = exportRowsFunc
 
 
     def editCell(self, event):
@@ -168,6 +180,7 @@ class Table(ttk.Treeview):
         self.popupMenu.entryconfigure("Copy car", state = "normal" if len(sel) == 1 else "disabled")
         self.popupMenu.entryconfigure("Paste car", state = "normal" if (len(sel) == 1 and self.hasStoredRow()) else "disabled")
         self.popupMenu.entryconfigure("Delete cars", state = "normal" if len(sel) > 0 else "disabled")
+        self.popupMenu.entryconfigure("Export cars", state = "normal" if len(sel) > 0 else "disabled")
 
         try:
             self.popupMenu.tk_popup(event.x_root, event.y_root)
@@ -195,6 +208,10 @@ class Table(ttk.Treeview):
         return [dict(zip(self["columns"], self.item(rowId, "values"))) for rowId in self.get_children()]
 
 
+    def getSelectedRows(self):
+        return [dict(zip(self["columns"], self.item(rowId, "values"))) for rowId in self.selection()]
+
+
     def storeSelectedRow(self):
         sel = self.selection()
         if len(sel) != 1: return
@@ -209,6 +226,14 @@ class Table(ttk.Treeview):
     def deleteSelectedRows(self):
         for rowId in self.selection():
             self.delete(rowId)
+
+
+    def importRows(self):
+        self.importRowsFunc()
+
+
+    def exportRows(self):
+        self.exportRowsFunc()
 
 
 class Textbox(tkinter.Text):
