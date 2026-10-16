@@ -9,6 +9,7 @@ class GT2SaveEditorForm(tkinter.Tk):
     def __init__(self, path):
         super().__init__()
         self.data = {}
+        self.parser = None
         self.initGUI()
         self.open(path, False)
 
@@ -18,6 +19,14 @@ class GT2SaveEditorForm(tkinter.Tk):
         self.initMenu()
         self.initTabs()
         self.geometry("950x450")
+        self.protocol("WM_DELETE_WINDOW", self.onClose)
+
+
+    def onClose(self):
+        if self.parser is not None:
+            if not self.askConfirmForLoadedSave(): return;
+
+        self.destroy()
 
 
     def initMenu(self):
@@ -244,9 +253,25 @@ class GT2SaveEditorForm(tkinter.Tk):
             entry.setState(active)
 
 
+    def askConfirmForLoadedSave(self):
+        res = messagebox.askyesnocancel("Confirmation", "Update current save?")
+
+        match res:
+            case None:
+                return False
+
+            case True:
+                return self.update()
+
+        return True
+
+
     def open(self, path, ask):
         if ask: path = filedialog.askopenfilename(title = "Open save")
         if not path: return
+
+        if self.parser is not None:
+            if not self.askConfirmForLoadedSave(): return;
 
         try:
             self.parser = GT2SaveParser(path)
@@ -289,7 +314,7 @@ class GT2SaveEditorForm(tkinter.Tk):
 
 
     def update(self):
-        if not self.parser: return
+        if self.parser is None: return
 
         saveData = {}
         for name in self.data:
@@ -322,7 +347,9 @@ class GT2SaveEditorForm(tkinter.Tk):
 
 
     def close(self):
-        if self.update(): self.setGUI(False, True)
+        if self.update():
+            self.setGUI(False, True)
+            self.parser = None
 
 
     def importCars(self):
