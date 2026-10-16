@@ -310,15 +310,15 @@ class GT2SaveEditorForm(tkinter.Tk):
 
         saveData["Cars"] = self.carsTable.getAllRows()
 
-        #try:
-        self.parser.update(saveData, self.slot)
-        self.print()
-        messagebox.showinfo("Info", "Save updated")
-        return True
+        try:
+            self.parser.update(saveData, self.slot)
+            self.print()
+            messagebox.showinfo("Info", "Save updated")
+            return True
 
-        #except Exception as e:
-        #    messagebox.showerror("Error", str(e))
-        #    return False
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+            return False
 
 
     def close(self):
