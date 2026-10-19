@@ -1,5 +1,5 @@
 # Gran Turismo 2 Save Editor
-This GUI tool allows users to read and edit save files for the PlayStation game Gran Turismo 2. It supports all save versions and regions, with partial compatibility for [GT2+](https://www.gtplanet.net/forum/threads/mod-gran-turismo-2-plus-bug-fixes-restored-content-and-new-content-beta-7-released.378282/) and [GT2AS](https://x.com/projectaspec) saves. The tool supports the formats SC (PS1 save slot), MC (PS1 memory card image), GME (DexDrive), PSV (PS1 save image for PS3).
+This GUI tool allows users to read and edit save files for the PlayStation game Gran Turismo 2. It supports all save versions and regions, with partial compatibility for [GT2+](https://www.gtplanet.net/forum/threads/mod-gran-turismo-2-plus-bug-fixes-restored-content-and-new-content-beta-7-released.378282/) and [GT2AS](https://x.com/projectaspec) saves. The tool supports the formats SC (PS1 save slot), MC (PS1 memory card image), GME (DexDrive), PSV (PS1 save image for PS3), but it does not support resigning PSV files.
 
 The tool can read and modify several game parameters:
 * General settings: language

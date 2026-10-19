@@ -358,7 +358,7 @@ class GT2SaveEditorForm(tkinter.Tk):
 
         n = 0
         for car in self.parser.importCars(path):
-            if n == GT2Save.MAX_CAR_COUNT: break
+            if len(self.carsTable.get_children()) == GT2Save.MAX_CAR_COUNT: break
             self.carsTable.insertRow(car)
             n += 1
 
