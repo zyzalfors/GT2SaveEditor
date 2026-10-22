@@ -24,7 +24,7 @@ class GT2SaveEditorForm(tkinter.Tk):
 
     def onClose(self):
         if self.parser is not None:
-            if not self.askConfirmForLoadedSave(): return;
+            if not self.askConfirmForLoadedSave(): return
 
         self.destroy()
 
@@ -271,7 +271,7 @@ class GT2SaveEditorForm(tkinter.Tk):
         if not path: return
 
         if self.parser is not None:
-            if not self.askConfirmForLoadedSave(): return;
+            if not self.askConfirmForLoadedSave(): return
 
         try:
             self.parser = GT2SaveParser(path)
