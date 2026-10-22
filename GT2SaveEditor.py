@@ -1,4 +1,4 @@
-import argparse, sys
+import sys
 from GT2SaveEditorForm import GT2SaveEditorForm
 
 if __name__ == "__main__":
