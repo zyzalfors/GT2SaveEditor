@@ -60,11 +60,11 @@ class GT2SaveEditorForm(tkinter.Tk):
 
 
     def initGeneralTab(self, nb):
-        tab = Tab(nb, 300, 180)
+        tab = Tab(nb, 300, 210)
         nb.add(tab, text = "General")
         vals = tuple(GT2Save.LANGUAGES.keys())
 
-        for i, name in enumerate(["Path", "Slot", "Serial", "Region", "CRC32", "Language"]):
+        for i, name in enumerate(["Path", "Format", "Slot", "Serial", "Region", "CRC32", "Language"]):
             label = tkinter.Label(tab.content, text = f"{name}:")
             label.place(x = 10, y = 5 + i * 30)
 
@@ -240,7 +240,7 @@ class GT2SaveEditorForm(tkinter.Tk):
                         self.data[name][entry].setState(active)
                         if clear: self.data[name][entry].setVal("")
 
-            elif name not in ["Path", "Serial", "Region", "CRC32", "Car count"]:
+            elif name not in ["Path", "Format", "Slot", "Serial", "Region", "CRC32", "Car count"]:
                 self.data[name].setState(active)
                 if clear: self.data[name].setVal("")
 

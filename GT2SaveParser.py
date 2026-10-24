@@ -32,7 +32,6 @@ class GT2SaveParser:
 
 
     def parse(self):
-        self.format = "Unknown"
         self.saves = []
 
         if len(self.data) >= self.SC_HEADER_SIZE + self.RAW_SAVE_SIZE:
@@ -54,6 +53,7 @@ class GT2SaveParser:
         if len(self.data) >= self.MC_SIZE and self.data.startswith(self.MC_MAGIC):
             self.format = "MC"
             gmeShift = 0
+
         elif len(self.data) >= self.GME_HEADER_SIZE + self.MC_SIZE and self.data.startswith(self.GME_MAGIC):
             self.format = "GME"
             gmeShift = self.GME_HEADER_SIZE
@@ -82,6 +82,7 @@ class GT2SaveParser:
 
         save = self.saves[i]
         return {"Path": self.path,
+                "Format": self.format,
                 "Serial": save.serial,
                 "Region": save.region,
                 "Language": save.get(GT2Save.DataType.LANGUAGE),
