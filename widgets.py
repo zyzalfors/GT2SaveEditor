@@ -170,7 +170,6 @@ class Table(ttk.Treeview):
 
     def showPopup(self, event):
         rowId = self.identify_row(event.y)
-        if not rowId: return
 
         if rowId not in self.selection():
             self.selection_set(rowId)
