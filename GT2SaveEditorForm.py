@@ -289,6 +289,8 @@ class GT2SaveEditorForm(tkinter.Tk):
         saveData = self.parser.read(self.slot)
         self.data["Slot"].setVal(str(self.slot))
         for name in saveData:
+            if name not in self.data: continue
+
             if isinstance(saveData[name], int) or isinstance(saveData[name], str):
                 self.data[name].setVal(saveData[name])
 
@@ -305,6 +307,9 @@ class GT2SaveEditorForm(tkinter.Tk):
                 self.carsTable.clearRows()
                 for car in saveData[name]:
                     self.carsTable.insertRow(car)
+
+        if not saveData["Valid CRC32"]:
+            self.data["CRC32"].setVal(f"{self.data["CRC32"].getVal()} (invalid)")
 
 
     def change(self):

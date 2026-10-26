@@ -77,7 +77,7 @@ class GT2SaveParser:
 
 
     def read(self, i):
-        if i < 0 or i >= len(self.saves):
+        if i not in range(len(self.saves)):
             raise ValueError(f"Invalid save index '{i}'")
 
         save = self.saves[i]
@@ -99,11 +99,12 @@ class GT2SaveParser:
                 "Car count": save.get(GT2Save.DataType.CAR_COUNT),
                 "Cars": save.get(GT2Save.DataType.CARS),
                 "Money": save.get(GT2Save.DataType.MONEY),
-                "CRC32": save.get(GT2Save.DataType.CRC32)}
+                "CRC32": save.get(GT2Save.DataType.CRC32),
+                "Valid CRC32": save.validCrc32()}
 
 
     def update(self, data, i):
-        if i < 0 or i >= len(self.saves):
+        if i not in range(len(self.saves)):
             raise ValueError(f"Invalid save index '{i}'")
 
         save = self.saves[i]

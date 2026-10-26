@@ -298,7 +298,7 @@ class GT2Save:
                 return self.getVal(self.PRIZE_OFFSET, self.PRIZE_SIZE, True)
 
             case GT2Save.DataType.EVENT_PROGRESS:
-               return self.getEventProgress()
+                return self.getEventProgress()
 
             case GT2Save.DataType.ENDING_MOVIE:
                 return bool(self.getVal(self.ENDING_MOVIE_OFFSET, self.ENDING_MOVIE_SIZE, False))
@@ -356,8 +356,8 @@ class GT2Save:
                 return
 
             case GT2Save.DataType.EVENT_PROGRESS:
-               self.updateEventProgress(data)
-               return
+                self.updateEventProgress(data)
+                return
 
             case GT2Save.DataType.ENDING_MOVIE:
                 self.updateVal(self.ENDING_MOVIE_OFFSET, self.ENDING_MOVIE_SIZE, False, data)
