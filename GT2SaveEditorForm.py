@@ -56,7 +56,7 @@ class GT2SaveEditorForm(tkinter.Tk):
         self.initCarsTab(nb)
         self.initLicenseProgressTab(nb)
         self.initEventProgressTab(nb)
-        self.initArcadeProgress(nb)
+        self.initArcadeProgressTab(nb)
 
 
     def initGeneralTab(self, nb):
@@ -168,7 +168,7 @@ class GT2SaveEditorForm(tkinter.Tk):
             combo.setVal("1st")
 
 
-    def initArcadeProgress(self, nb):
+    def initArcadeProgressTab(self, nb):
         tab = Tab(nb, 780, 280)
         nb.add(tab, text = "Arcade progress")
 
